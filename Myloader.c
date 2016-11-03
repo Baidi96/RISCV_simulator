@@ -74,12 +74,12 @@ int main(int argc, char **argv)
 	//run(mem, entry);
 	
 	// Test...
-	
+	/*
 	for(i = 0; i < 40; i += 4)
 	{
 		printf("0x%08x:\t0x%08x\n", e.e_entry + i, *(int*)(entry + i));
 	}
-	
+	*/
 	
 	// Exit
 	fclose(fp2);

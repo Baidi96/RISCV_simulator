@@ -3,11 +3,17 @@
 #include "arch.h"
 #endif
 #include <stdio.h>
+
+void* memptr(Addr addr)
+{
+	return (void*)(Mem + addr);
+}
+
 /*Read an instruction*/
 Reg get_instruction()
 {
-	Reg IF;
-	IF = *(Reg*)PC;
+	int IF;					// Instructions are 4-bytes long
+	IF = *(int*)memptr(PC);
 	return IF;
 }
 int decode_and_run(Reg IF)
@@ -30,36 +36,34 @@ int decode_and_run(Reg IF)
 		default:
 		{
 			printf("error! No such opcode:%d\n",op);
-			return 1;
+			return 2;
 		}
 	}
 	return 0;
 }
 int Fetch_Instruction()
 {
-	Reg IF = get_instruction();
+	int IF = get_instruction();
 	/*update PC*/
 	PC += 4;
-	if(decode_and_run(IF) == 0)
-		return 0;//no problem
+	int stat = decode_and_run(IF);
+	if(stat == 0)
+		return 0;									// no problem
+	else if(stat == 1)
+		return 1;									// normal exit
 	else
 	{
 		printf("exec wrong in %lld\n",*(long*)PC);	// show the erroneous instruction
-		return 1;
+		return 2;									// abnormal exit
 	}
-}
-
-void* memptr(Addr addr)
-{
-	return (void*)(Mem + addr);
 }
 
 void init(Addr entry)
 {
 	memset(RegFile, 0, sizeof(RegFile));
-	RegFile[2] = Stack_base;		// set sp
+	RegFile[2] = Stack_base;				// set sp
 	// gp, tp ?
 	
-	PC = memptr(entry);
+	PC = entry;
 }
 
