@@ -1,0 +1,4 @@
+For this stimulator,it consistors of below parts:
+loading part:the initial part of stimulator for load an ELF file to the stimulator,it takes the name of ELF file and return the text Section's address and load the section should be loaded to the memory
+exectuion part:this part run a single instruction of the RISCV codes.This part will starts from the begin of code and run until meet the syscall stands for EXIT in a loop.
+show part:it controls how stimulator show itself to the users
