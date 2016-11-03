@@ -3,7 +3,7 @@
 #include "def.h"
 #endif
 Reg RegFile[Reg_number];
-int Mem[Mem_size];
+char Mem[Mem_size];
 inline int opcode(Reg IF)
 {
 	return IF&((1<<7)-1);

@@ -10,7 +10,7 @@ Reg get_instruction()
 	IF = *(Reg*)PC;
 	return IF;
 }
-bool decode_and_run(Reg IF)
+int decode_and_run(Reg IF)
 {
 	int op = opcode(IF);
 	switch(op)
@@ -29,9 +29,11 @@ bool decode_and_run(Reg IF)
 		case(ALUR_64): break;
 		default:
 		{
-			printf("error!No such opcode:%d\n",op);
+			printf("error! No such opcode:%d\n",op);
+			return 1;
 		}
 	}
+	return 0;
 }
 int Fetch_Instruction()
 {
@@ -42,7 +44,22 @@ int Fetch_Instruction()
 		return 0;//no problem
 	else
 	{
-		printf("exec wrong in %lld\n",*(long long*)PC);
+		printf("exec wrong in %lld\n",*(long*)PC);	// show the erroneous instruction
 		return 1;
 	}
 }
+
+void* memptr(Addr addr)
+{
+	return (void*)(Mem + addr);
+}
+
+void init(Addr entry)
+{
+	memset(RegFile, 0, sizeof(RegFile));
+	RegFile[2] = Stack_base;		// set sp
+	// gp, tp ?
+	
+	PC = memptr(entry);
+}
+
