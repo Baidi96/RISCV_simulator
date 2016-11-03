@@ -32,3 +32,13 @@ inline int funct7(int IF)
 {
 	return (IF>>25)&((1<<7)-1);
 }
+inline int read_memory(char* buff,int size,Addr mem_address)
+{
+
+}
+inline int write_memory(char* buff,int size,Addr mem_address)
+{
+
+}
+
+

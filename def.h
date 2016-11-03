@@ -1,6 +1,8 @@
 #include <string.h>
+
 typedef long long Reg;
 typedef unsigned long long Addr;
+
 const int Reg_number = 32;
 const unsigned long long Mem_size = 1LL<<29;	// 512MB
 const Addr Stack_base = Mem_size - (1 << 12);	// save 4KB (may need to modify)
