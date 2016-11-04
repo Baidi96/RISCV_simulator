@@ -2,6 +2,11 @@
 #define DEF_H
 #include "def.h"
 #endif
+#ifndef ARCH_H
+#define ARCH_H
+#include "arch.h"
+#endif
+#include <stdio.h>
 inline void* memptr(Addr addr)
 {
 	return (void*)(Mem + addr);
@@ -57,6 +62,84 @@ int ALUI_64_func(Reg IF)
 				printf("ALUI_64 error!No such instruction\n");
 				return 1;
 			}
+	}
+	return 0;
+}
+int ALUR_func(Reg IF)
+{
+	switch(funct3(IF))
+	{
+		case 0:
+		{
+			switch(funct7(IF))
+			{
+				case 0:break;//ADD
+				case 0x20:break;//SUB
+				default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}
+			}
+			break;
+		}
+		case 4:break;//XOR
+		case 6:break;//OR
+		case 7:break;//AND
+		case 1:break;//SLL
+		case 2:break;//SLT
+		case 3:break;//SLTU
+		case 5:
+		{
+			switch(funct7(IF))
+			{
+				case 0:break;//SRL
+				case 0x20:break;//SRA
+				default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}
+			}
+			break;
+		}
+		default:
+		{
+			printf("ALUR error!No such instruction\n");
+			return 1;
+		}
+	}
+	return 0;
+}
+int ALUI_func(Reg IF)
+{
+	switch(funct3(IF))
+	{
+		case 0:break;//ADDI
+		case 2:break;//SLTI
+		case 3:break;//SLTIU
+		case 4:break;//XORI
+		case 6:break;//ORI
+		case 7:break;//ANDI
+		case 1:break;//SLLI
+		case 5:
+		{
+			switch(funct7(IF))
+			{
+				case 0:break;//SRLI
+				case 0x20:break;//SRAI
+				default:
+				{
+					printf("ALUI error!No such instruction\n");
+					return 1;
+				}
+			}
+		}
+		default:
+		{
+			printf("ALUI error!No such instruction\n");
+			return 1;
+		}
 	}
 	return 0;
 }

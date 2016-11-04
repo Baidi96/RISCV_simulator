@@ -14,8 +14,8 @@ int decode_and_run(Reg IF)
 	{
 		case(Load):Load_func(IF);break;
 		case(Store):Store_func(IF);break;
-		case(ALUR): break;
-		case(ALUI): break;
+		case(ALUR): ALUR_func(IF);break;
+		case(ALUI): ALUI_func(IF);break;
 		case(LUI):LUI_func(IF);break;
 		case(AUIPC):AUIPC_func(IF);break;
 		case(Branch):Branch_func(IF);break;
