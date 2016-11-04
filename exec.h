@@ -7,23 +7,35 @@
 #include "func.h"
 #include <stdio.h>
 
-int decode_and_run(Reg IF)
+int decode_and_run(int IF)
 {
 	int op = opcode(IF);
 	switch(op)
 	{
-		case(Load):Load_func(IF);break;
-		case(Store):Store_func(IF);break;
-		case(ALUR): ALUR_func(IF);break;
-		case(ALUI): ALUI_func(IF);break;
-		case(LUI):LUI_func(IF);break;
-		case(AUIPC):AUIPC_func(IF);break;
-		case(Branch):Branch_func(IF);break;
-		case(JAL):JAL_func(IF);break;
- 		case(JALR):JALR_func(IF);break;
-		case(Syscall): Syscall_func();break;
-		case(ALUI_64): ALUI_64_func(IF); break;
-		case(ALUR_64): ALUR_64_func(IF);break;
+		case(Load):
+			return Load_func(IF);
+		case(Store):
+			return Store_func(IF);
+		case(ALUR):
+			return ALUR_func(IF);
+		case(ALUI):
+			return ALUI_func(IF);
+		case(LUI):
+			return LUI_func(IF);
+		case(AUIPC):
+			return AUIPC_func(IF);
+		case(Branch):
+			return Branch_func(IF);
+		case(JAL):
+			return JAL_func(IF);
+ 		case(JALR):
+ 			return JALR_func(IF);
+		case(Syscall):
+			return Syscall_func();
+		case(ALUI_64):
+			return ALUI_64_func(IF);
+		case(ALUR_64):
+			return ALUR_64_func(IF);
 		default:
 		{
 			printf("error! No such opcode:%d\n",op);

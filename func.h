@@ -20,11 +20,11 @@ Reg get_instruction()
 	PC += 4;
 	return IF;
 }
-int AUIPC_func(Reg IF)
+int AUIPC_func(int IF)
 {
 
 }
-int LUI_func(Reg IF)
+int LUI_func(int IF)
 {
 
 }
@@ -42,7 +42,7 @@ int Fetch_Instruction()
 		return 2;									// abnormal exit
 	}
 }
-int ALUI_64_func(Reg IF)
+int ALUI_64_func(int IF)
 {
 	switch(funct3(IF))
 	{
@@ -65,7 +65,7 @@ int ALUI_64_func(Reg IF)
 	}
 	return 0;
 }
-int ALUR_func(Reg IF)
+int ALUR_func(int IF)
 {
 	switch(funct3(IF))
 	{
@@ -111,7 +111,7 @@ int ALUR_func(Reg IF)
 	}
 	return 0;
 }
-int ALUI_func(Reg IF)
+int ALUI_func(int IF)
 {
 	switch(funct3(IF))
 	{
@@ -143,7 +143,7 @@ int ALUI_func(Reg IF)
 	}
 	return 0;
 }
-int ALUR_64_func(Reg IF)
+int ALUR_64_func(int IF)
 {
 	switch(funct3(IF))
 	{
@@ -184,7 +184,7 @@ int ALUR_64_func(Reg IF)
 	}
 	return 0;
 }
-int Branch_func(Reg IF)
+int Branch_func(int IF)
 {
 	switch(funct3(IF))
 	{
@@ -202,13 +202,13 @@ int Branch_func(Reg IF)
 	}
 	return 0;
 }
-int JAL_func(Reg IF)
+int JAL_func(int IF)
 {
 }
-int JALR_func(Reg IF)
+int JALR_func(int IF)
 {
 }
-int Load_func(Reg IF)
+int Load_func(int IF)
 {
 	switch(funct3(IF))
 	{
@@ -227,7 +227,7 @@ int Load_func(Reg IF)
 	}
 	return 0;
 }
-int Store_func(Reg IF)
+int Store_func(int IF)
 {
 	switch(funct3(IF))
 	{
