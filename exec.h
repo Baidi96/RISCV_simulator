@@ -3,7 +3,6 @@
 #include "arch.h"
 #endif
 
-
 #include "func.h"
 #include <stdio.h>
 

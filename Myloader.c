@@ -71,15 +71,23 @@ int main(int argc, char **argv)
 	}
 	
 	init(e.e_entry);
-	//run(mem, entry);
+	int stat;
+	while(1)
+	{
+		int IF = get_instruction();
+		// IF = 0x100513;				// addi a0, zero, 1
+		printf("IF = %x\n", IF);
+		stat = decode_and_run(IF);
+		if(stat != 0)
+			break;
+	}
 	
 	// Test...
-	/*
-	for(i = 0; i < 40; i += 4)
+	printf("Registers:\n");
+	for(i = 0; i < Reg_number; i++)
 	{
-		printf("0x%08x:\t0x%08x\n", e.e_entry + i, *(int*)(entry + i));
+		printf("Reg %d: %lld\n", i, RegFile[i]);
 	}
-	*/
 	
 	// Exit
 	fclose(fp2);

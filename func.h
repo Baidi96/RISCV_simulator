@@ -7,12 +7,36 @@
 #include "arch.h"
 #endif
 #include <stdio.h>
-inline void* memptr(Addr addr)
+void* memptr(Addr addr)
 {
 	return (void*)(Mem + addr);
 }
+
+void read_memory(void* buff, int size, Addr mem_address)
+{
+	if(size == 1)
+		*(char*)buff = *(char*)memptr(mem_address);
+	else if(size == 2)
+		*(short*)buff = *(short*)memptr(mem_address);
+	else if(size == 4)
+		*(int*)buff = *(int*)memptr(mem_address);
+	else if(size == 8)
+		*(long long*)buff = *(long long*)memptr(mem_address);
+}
+void write_memory(void* buff, int size, Addr mem_address)
+{
+	if(size == 1)
+		*(char*)memptr(mem_address) = *(char*)buff;
+	else if(size == 2)
+		*(short*)memptr(mem_address) = *(short*)buff;
+	else if(size == 4)
+		*(int*)memptr(mem_address) = *(int*)buff;
+	else if(size == 8)
+		*(long long*)memptr(mem_address) = *(long long*)buff;
+}
+
 /*Read an instruction*/
-Reg get_instruction()
+int get_instruction()
 {
 	int IF;					// Instructions are 4-bytes long
 	IF = *(int*)memptr(PC);
@@ -33,13 +57,13 @@ int Fetch_Instruction()
 	int IF = get_instruction();
 	int stat = decode_and_run(IF);
 	if(stat == 0)
-		return 0;									// no problem
+		return 0;											// no problem
 	else if(stat == 1)
-		return 1;									// normal exit
+		return 1;											// normal exit
 	else
 	{
-		printf("exec wrong in %lld\n",*(long*)PC);	// show the erroneous instruction
-		return 2;									// abnormal exit
+		printf("exec wrong in %d\n",*(int*)memptr(PC));		// show the erroneous instruction
+		return 2;											// abnormal exit
 	}
 }
 int ALUI_64_func(int IF)
@@ -115,7 +139,12 @@ int ALUI_func(int IF)
 {
 	switch(funct3(IF))
 	{
-		case 0:break;//ADDI
+		case 0:			//ADDI
+		{
+			int imm = IF >> 20;
+			RegFile[rd(IF)] = RegFile[rs1(IF)] + imm;
+			break;
+		}
 		case 2:break;//SLTI
 		case 3:break;//SLTIU
 		case 4:break;//XORI
