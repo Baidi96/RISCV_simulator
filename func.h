@@ -44,13 +44,16 @@ int get_instruction()
 	PC += 4;
 	return IF;
 }
-int AUIPC_func(int IF)
+int AUIPC_func(int IF)      //RV32 function
 {
-
+    PC += (IF >> 12) << 12;
+    RegFile[rd(IF)] = PC;
 }
-int LUI_func(int IF)
+int LUI_func(int IF)        //RV32 function
 {
-
+    int U = IF >> 12;
+    RegFile[rd(IF)] = U << 12;
+    
 }
 int Fetch_Instruction()
 {
