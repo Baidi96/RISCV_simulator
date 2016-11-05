@@ -427,9 +427,17 @@ int JAL_func(int IF)
     offset += ((IF>>31)&1)<<20;
     RegFile[rd(IF)] = pc + 4;
     pc +=offset;
+    return 0;
 }
 int JALR_func(int IF)
 {
+    int offset = ((IF>>20)&(1<<11-1));
+    long long toAddress = (RegFile[rs1(IF)] + offset);
+    if(toAddress&1)
+        toAddress -=1;
+    RegFile[rd(IF)] = pc + 4;
+    pc = toAddress;
+    return 0;
 }
 int Load_func(int IF)
 {
