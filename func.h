@@ -46,14 +46,15 @@ int get_instruction()
 }
 int AUIPC_func(int IF)      //RV32 function
 {
-    PC += (IF >> 12) << 12;
-    RegFile[rd(IF)] = PC;
+    long long imm= (IF >> 12) << 12;
+    RegFile[rd(IF)] = PC+ imm;
+    return 0;
 }
 int LUI_func(int IF)        //RV32 function
 {
     int U = IF >> 12;
     RegFile[rd(IF)] = U << 12;
-    
+    return 0;
 }
 int Fetch_Instruction()
 {
