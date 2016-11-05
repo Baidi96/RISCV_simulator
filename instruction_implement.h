@@ -34,7 +34,7 @@ void LB(int IF)
 }
 void LBU(int IF)
 {
-	char tmp;
+	unsigned char tmp;
 	read_memory(&tmp,1,RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
 	RegFile[rd(IF)]=(unsigned long long)tmp;
 }
@@ -46,7 +46,7 @@ void LH(int IF)
 }
 void LHU(int IF)
 {
-	short tmp;
+	unsigned short tmp;
 	read_memory(&tmp,2,RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
 	RegFile[rd(IF)]=(unsigned long long)tmp;
 }
@@ -58,7 +58,7 @@ void LW(int IF)
 }
 void LWU(int IF)
 {
-	int tmp;
+	unsigned int tmp;
 	read_memory(&tmp,sizeof(int),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
 	RegFile[rd(IF)]=(unsigned long long)tmp;
 }
