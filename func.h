@@ -6,8 +6,9 @@
 #define ARCH_H
 #include "arch.h"
 #endif
-#include "instruction_implement.h"
+
 #include <stdio.h>
+
 void* memptr(Addr addr)
 {
 	return (void*)(Mem + addr);
@@ -36,7 +37,7 @@ void write_memory(void* buff, int size, Addr mem_address)
 		*(long long*)memptr(mem_address) = *(long long*)buff;
 }
 
-/*Read an instruction*/
+// Read an instruction
 int get_instruction()
 {
 	int IF;					// Instructions are 4-bytes long
@@ -45,18 +46,7 @@ int get_instruction()
 	PC += 4;
 	return IF;
 }
-int AUIPC_func(int IF)      //RV32 function
-{
-    long long imm= ((long long)IF >> 12) << 12;
-    RegFile[rd(IF)] = PC+ imm;
-    return 0;
-}
-int LUI_func(int IF)        //RV32 function
-{
-    int U = IF >> 12;
-    RegFile[rd(IF)] = ((long long)U) << 12;
-    return 0;
-}
+
 int Fetch_Instruction()
 {
 	int IF = get_instruction();
@@ -70,6 +60,100 @@ int Fetch_Instruction()
 		printf("exec wrong in %d\n",*(int*)memptr(PC));		// show the erroneous instruction
 		return 2;											// abnormal exit
 	}
+}
+
+// Instruction implementations
+
+#define ADD(IF) RegFile[rd(IF)]=RegFile[rs1(IF)]+RegFile[rs2(IF)]
+#define ADDW(IF) RegFile[rd(IF)]=(int)RegFile[rs1(IF)]+(int)RegFile[rs2(IF)]
+#define SUB(IF) RegFile[rd(IF)]=RegFile[rs1(IF)]-RegFile[rs2(IF)]
+#define SUBW(IF) RegFile[rd(IF)]=(int)RegFile[rs1(IF)]-(int)RegFile[rs2(IF)]
+#define XOR(IF) RegFile[rd(IF)]=RegFile[rs1(IF)]^RegFile[rs2(IF)]
+#define OR(IF) RegFile[rd(IF)]=RegFile[rs1(IF)]|RegFile[rs2(IF)]
+#define AND(IF) RegFile[rd(IF)]=RegFile[rs1(IF)]&RegFile[rs2(IF)]
+#define SLL(IF) RegFile[rd(IF)]=RegFile[rs1(IF)]<<(RegFile[rs2(IF)]&0x03F)
+#define SLLW(IF) RegFile[rd(IF)]=((int)RegFile[rs1(IF)])<<(RegFile[rs2(IF)]&0x01F)
+#define SRL(IF) RegFile[rd(IF)]=((unsigned long long)RegFile[rs1(IF)])>>(RegFile[rs2(IF)]&0x03F)
+#define SRLW(IF) RegFile[rd(IF)]=(((unsigned int)RegFile[rs1(IF)]))>>(RegFile[rs2(IF)]&0x01F)
+#define SRA(IF) RegFile[rd(IF)]=((long long)RegFile[rs1(IF)])>>(RegFile[rs2(IF)]&0x03F)
+#define SRAW(IF) RegFile[rd(IF)]=(((int)RegFile[rs1(IF)])>>(RegFile[rs2(IF)]&0x01F))
+#define SLT(IF) RegFile[rd(IF)]=((long long)RegFile[rs1(IF)]<(long long)RegFile[rs2(IF)])
+#define SLTU(IF) RegFile[rd(IF)]=((unsigned long long)RegFile[rs1(IF)]<(unsigned long long)RegFile[rs2(IF)])
+void LB(int IF)
+{
+	char tmp;
+	read_memory(&tmp,1,RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	RegFile[rd(IF)]=(long long)tmp;
+}
+void LBU(int IF)
+{
+	unsigned char tmp;
+	read_memory(&tmp,1,RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	RegFile[rd(IF)]=(unsigned long long)tmp;
+}
+void LH(int IF)
+{
+	short tmp;
+	read_memory(&tmp,2,RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	RegFile[rd(IF)]=(long long)tmp;
+}
+void LHU(int IF)
+{
+	unsigned short tmp;
+	read_memory(&tmp,2,RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	RegFile[rd(IF)]=(unsigned long long)tmp;
+}
+void LW(int IF)
+{
+	int tmp;
+	read_memory(&tmp,sizeof(int),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	RegFile[rd(IF)]=(long long)tmp;
+}
+void LWU(int IF)
+{
+	unsigned int tmp;
+	read_memory(&tmp,sizeof(int),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	RegFile[rd(IF)]=(unsigned long long)tmp;
+}
+void LD(int IF)
+{
+	long long tmp;
+	read_memory(&tmp,sizeof(long long),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	RegFile[rd(IF)]=tmp;
+}
+void SB(int IF)
+{
+	char tmp=RegFile[rd(IF)]&0XFF;
+	write_memory(&tmp,1,RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+}
+void SH(int IF)
+{
+	short tmp=RegFile[rd(IF)]&0XFFFF;
+	write_memory(&tmp,2,RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+}
+void SW(int IF)
+{
+	int tmp=RegFile[rd(IF)]&0XFFFFFFFF;
+	write_memory(&tmp,4,RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+}
+void SD(int IF)
+{
+	write_memory(&RegFile[rs2(IF)],8,RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+}
+
+// Instruction category parsing
+
+int AUIPC_func(int IF)      //RV32 function
+{
+    long long imm = ((long long)IF >> 12) << 12;
+    RegFile[rd(IF)] = PC+ imm;
+    return 0;
+}
+int LUI_func(int IF)        //RV32 function
+{
+    int U = IF >> 12;
+    RegFile[rd(IF)] = ((long long)U) << 12;
+    return 0;
 }
 int ALUI_64_func(int IF)
 {
@@ -352,6 +436,8 @@ int Syscall_func()
 {
 	return 0;
 }
+
+
 void init(Addr entry)
 {
 	memset(RegFile, 0, sizeof(RegFile));

@@ -1,0 +1,16 @@
+Finished:
+
+Load
+Save
+ALU(Arith & Logic)
+Shift
+Compare
+ALU_64
+
+
+Unfinished:
+
+Branch
+JAL
+Scall
+

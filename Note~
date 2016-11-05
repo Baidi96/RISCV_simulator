@@ -1,4 +1,0 @@
-IMAFD:缩写G
-M for integer multiplication and division
-F for single-precision floating-point instructions
-RV64I：整型寄存器与地址空间64位 *W指令忽略高32位，总是产生32位有符号值
