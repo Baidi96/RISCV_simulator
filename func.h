@@ -97,8 +97,8 @@ int ALUR_func(int IF)
 		{
 			switch(funct7(IF))
 			{
-				case 0:break;//ADD
-				case 0x20:break;//SUB
+				case 0:ADD(IF);break;//ADD
+				case 0x20:SUB(IF);break;//SUB
 				default:
 				{
 					printf("ALUR error!No such instruction\n");
@@ -107,18 +107,18 @@ int ALUR_func(int IF)
 			}
 			break;
 		}
-		case 4:break;//XOR
-		case 6:break;//OR
-		case 7:break;//AND
-		case 1:break;//SLL
-		case 2:break;//SLT
-		case 3:break;//SLTU
+		case 4:XOR(IF);break;//XOR
+		case 6:OR(IF);break;//OR
+		case 7:AND(IF);break;//AND
+		case 1:SLL(IF);break;//SLL
+		case 2:SLT(IF);break;//SLT
+		case 3:SLTU(IF);break;//SLTU
 		case 5:
 		{
 			switch(funct7(IF))
 			{
-				case 0:break;//SRL
-				case 0x20:break;//SRA
+				case 0:SRL(IF);break;//SRL
+				case 0x20:SRA(IF);break;//SRA
 				default:
 				{
 					printf("ALUR error!No such instruction\n");
