@@ -75,14 +75,45 @@ int ALUI_64_func(int IF)
 {
 	switch(funct3(IF))
 	{
-		case 0:break;//ADDIW
-		case 1:break;//SSLIW
+        case 0:{           //ADDIW
+            signed int imm = IF >> 20;
+            RegFile[rd(IF)] = RegFile[rs1(IF)] + imm;
+            break;
+        }
+        case 1:{           //SLLIW
+            if((IF>>25)&1 !=0){
+                printf("Illegal instruction exception\n");
+                return 1;
+            }
+            int imm = RegFile[rs1(IF)]<<rs2(IF);
+            long long tmp = ~(1<<32-1);
+            RegFile[rd(IF)] = (RegFile[rd(IF)]&tmp) + imm;
+            break;
+        }
 		case 5:
 		{
 			switch(funct7(IF))
 			{
-				case 0x20:break;//SRAIW
-				case 0x00:break;//SRLIW
+                case 0x20:{//SRAIW
+                    if((IF>>25)&1 !=0){
+                        printf("Illegal instruction exception\n");
+                        return 1;
+                    }
+                    int imm = RegFile[rs1(IF)]>>rs2(IF);
+                    long long tmp = ~(1<<32-1);
+                    RegFile[rd(IF)] = (RegFile[rd(IF)]&tmp) + imm;
+                    break;
+                }
+                case 0x00:{//SRLIW
+                    if((IF>>25)&1 !=0){
+                        printf("Illegal instruction exception\n");
+                        return 1;
+                    }
+                    unsigned int imm = RegFile[rs1(IF)]>>rs2(IF);
+                    long long tmp = ~(1<<32-1);
+                    RegFile[rd(IF)] = (RegFile[rd(IF)]&tmp) + imm;
+                    break;
+                }
 			} 
 			break;
 		}
