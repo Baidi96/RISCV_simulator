@@ -6,6 +6,7 @@
 #define ARCH_H
 #include "arch.h"
 #endif
+#include "instruction_implement.h"
 #include <stdio.h>
 void* memptr(Addr addr)
 {
@@ -39,21 +40,22 @@ void write_memory(void* buff, int size, Addr mem_address)
 int get_instruction()
 {
 	int IF;					// Instructions are 4-bytes long
-	IF = *(int*)memptr(PC);
+	read_memory(&IF, sizeof(int), PC);
+	//IF = *(int*)memptr(PC);
 	/*update PC*/
 	PC += 4;
 	return IF;
 }
 int AUIPC_func(int IF)      //RV32 function
 {
-    long long imm= (IF >> 12) << 12;
+    long long imm= ((long long)IF >> 12) << 12;
     RegFile[rd(IF)] = PC+ imm;
     return 0;
 }
 int LUI_func(int IF)        //RV32 function
 {
     int U = IF >> 12;
-    RegFile[rd(IF)] = U << 12;
+    RegFile[rd(IF)] = ((long long)U) << 12;
     return 0;
 }
 int Fetch_Instruction()
@@ -285,13 +287,13 @@ int Load_func(int IF)
 {
 	switch(funct3(IF))
 	{
-		case 0:break;//LB
-		case 1:break;//LH
-		case 2:break;//LW
-		case 4:break;//LBU
-		case 5:break;//LHU
-		case 6:break;//LWU
-		case 3:break;//LD
+		case 0:LB(IF);break;//LB
+		case 1:LH(IF);break;//LH
+		case 2:LW(IF);break;//LW
+		case 4:LBU(IF);break;//LBU
+		case 5:LHU(IF);break;//LHU
+		case 6:LWU(IF);break;//LWU
+		case 3:LD(IF);break;//LD
 		default:
 		{
 			printf("Load_func error!No such instruction\n");
@@ -304,10 +306,10 @@ int Store_func(int IF)
 {
 	switch(funct3(IF))
 	{
-		case 0:break;//SB
-		case 1:break;//SH
-		case 2:break;//SW
-		case 3:break;//SD
+		case 0:SB(IF);break;//SB
+		case 1:SH(IF);break;//SH
+		case 2:SW(IF);break;//SW
+		case 3:SD(IF);break;//SD
 		default:
 		{
 			printf("Store_func error!No such instruction\n");
