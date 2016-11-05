@@ -378,8 +378,8 @@ int Branch_func(int IF)
 	switch(funct3(IF))
 	{
         int offset = ((IF>>7)&1)<<11;
-        offset += ((IF>>8)&(1<<5-1))<<1;
-        offset += ((IF>>25)&(1<<7-1))<<5;
+        offset += ((IF>>8)&(1<<4-1))<<1;
+        offset += ((IF>>25)&(1<<6-1))<<5;
         offset += ((IF>>31)&1)<<12;
         case 0:{        //BEQ
             if(RegFile[rs1(IF)]==RegFile[rs2(IF)])
