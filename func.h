@@ -41,7 +41,6 @@ int get_instruction()
 {
 	int IF;					// Instructions are 4-bytes long
 	read_memory(&IF, sizeof(int), PC);
-	//IF = *(int*)memptr(PC);
 	/*update PC*/
 	PC += 4;
 	return IF;
@@ -85,7 +84,7 @@ int ALUI_64_func(int IF)
 				case 0x20:break;//SRAIW
 				case 0x00:break;//SRLIW
 			} 
-			break;//ADDIW
+			break;
 		}
 		default:
 			{
@@ -226,8 +225,8 @@ int ALUR_64_func(int IF)
 		{
 			switch(funct7(IF))
 			{
-				case 0x0:break;//ADDW
-				case 0x20:break;//SUBW
+				case 0x0:ADDW(IF);break;//ADDW
+				case 0x20:SUBW(IF);break;//SUBW
 				default:
 				{
 					printf("ALUR_64 error!No such instruction\n");
@@ -236,13 +235,13 @@ int ALUR_64_func(int IF)
 			}
 			break;
 		}
-		case 1:break;//SLLW
+		case 1:SLLW(IF);break;//SLLW
 		case 5:
 		{
 			switch(funct7(IF))
 			{
-				case 0:break;//SRLW
-				case 0x20:break;//SRAW
+				case 0:SRLW(IF);break;//SRLW
+				case 0x20:SRAW(IF);break;//SRAW
 				default:
 				{
 					printf("ALUR_64 error!No such instruction\n");
