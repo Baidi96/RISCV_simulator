@@ -145,18 +145,58 @@ int ALUI_func(int IF)
 			RegFile[rd(IF)] = RegFile[rs1(IF)] + imm;
 			break;
 		}
-		case 2:break;//SLTI
-		case 3:break;//SLTIU
-		case 4:break;//XORI
-		case 6:break;//ORI
-		case 7:break;//ANDI
-		case 1:break;//SLLI
+        case 2:{        //SLTI
+            signed int imm = IF >> 20;
+            long long imm64 = imm;
+            if(RegFile[rs1(IF)] < imm64)
+                RegFile[rd(IF)] = 1;
+            else
+                RegFile[rd(IF)] = 0;
+            break;
+        }
+        case 3:{        //SLTIU
+            unsigned int imm = IF >> 20;
+            long long imm64 = imm;
+            if((unsigned)RegFile[rs1(IF)] < imm64)
+                RegFile[rd(IF)] = 1;
+            else
+                RegFile[rd(IF)] = 0;
+            break;
+        }
+        case 4:{        //XORI
+            signed int imm = IF >> 20;
+            long long imm64 = imm;
+            RegFile[rd(IF)] = imm64 ^ RegFile[rs1(IF)];
+            break;
+        }
+        case 6:{        //ORI
+            signed int imm = IF >> 20;
+            long long imm64 = imm;
+            RegFile[rd(IF)] = imm64 | RegFile[rs1(IF)];
+            break;
+        }
+        case 7:{        //ANDI
+            signed int imm = IF >> 20;
+            long long imm64 = imm;
+            RegFile[rd(IF)] = imm64 & RegFile[rs1(IF)];
+            break;
+        }
+        case 1:{        //SLLI
+            RegFile[rd(IF)] = RegFile[rs1(IF)]<<rs2(IF);
+            break;
+        }
 		case 5:
 		{
 			switch(funct7(IF))
 			{
-				case 0:break;//SRLI
-				case 0x20:break;//SRAI
+                case 0:{   //SRLI
+                    RegFile[rd(IF)] = (unsigned long long)RegFile[rs1(IF)]>>rs2(IF);
+                    break;
+                }
+                case 0x20:{//SRAI
+                    RegFile[rd(IF)] = RegFile[rs1(IF)]>>rs2(IF);
+                    break;
+                }
 				default:
 				{
 					printf("ALUI error!No such instruction\n");
