@@ -421,6 +421,12 @@ int Branch_func(int IF)
 }
 int JAL_func(int IF)
 {
+    int offset = ((IF>>12)&(1<<8-1))<<12;
+    offset += ((IF>>20)&1)<<11;
+    offset += ((IF>>21)&(1<<10-1))<<1;
+    offset += ((IF>>31)&1)<<20;
+    RegFile[rd(IF)] = pc + 4;
+    pc +=offset;
 }
 int JALR_func(int IF)
 {
