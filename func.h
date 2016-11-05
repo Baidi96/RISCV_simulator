@@ -377,12 +377,40 @@ int Branch_func(int IF)
 {
 	switch(funct3(IF))
 	{
-		case 0:break;//BEQ
-		case 1:break;//BNE
-		case 4:break;//BLT
-		case 5:break;//BGE
-		case 6:break;//BLTU
-		case 7:break;//BGEU
+        int offset = ((IF>>7)&1)<<11;
+        offset += ((IF>>8)&(1<<5-1))<<1;
+        offset += ((IF>>25)&(1<<7-1))<<5;
+        offset += ((IF>>31)&1)<<12;
+        case 0:{        //BEQ
+            if(RegFile[rs1(IF)]==RegFile[rs2(IF)])
+                PC += offset;
+            break;
+        }
+        case 1:{        //BNE
+            if(RegFile[rs1(IF)]!=RegFile[rs2(IF)])
+                PC += offset;
+            break;
+        }
+        case 4:{        //BLT
+            if(RegFile[rs1(IF)]<RegFile[rs2(IF)])
+                PC += offset;
+            break;
+        }
+        case 5:{        //BGE
+            if(RegFile[rs1(IF)]>=RegFile[rs2(IF)])
+                PC += offset;
+            break;
+        }
+        case 6:{        //BLTU
+            if((unsigned)RegFile[rs1(IF)]<(unsigned)RegFile[rs2(IF)])
+                PC += offset;
+            break;
+        }
+        case 7:{        //BGEU
+            if((unsigned)RegFile[rs1(IF)]>=(unsigned)RegFile[rs2(IF)])
+                PC += offset;
+            break;
+        }
 		default:
 		{
 			printf("Branch_func error!No such instruction\n");
