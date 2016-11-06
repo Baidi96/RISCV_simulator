@@ -52,7 +52,12 @@ struct prog_head
 	
 int main(int argc, char **argv)
 {
-	char *exec_filename = argv[1];
+	char *exec_filename = argv[argc - 1];
+	int debug = 0;
+	if(argc == 3 && strcmp(argv[1], "-d") == 0)		// debug mode
+	{
+		debug = 1;
+	}
 	
 	FILE *fp = fopen(exec_filename,"rb");
 	FILE *fp2 = fopen(exec_filename, "rb");
@@ -75,19 +80,49 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		int IF = get_instruction();
-		// IF = 0x100513;				// addi a0, zero, 1
 		printf("IF = %x\n", IF);
 		stat = decode_and_run(IF);
 		if(stat != 0)
 			break;
+		
+		if(debug)								// In debug mode
+		{
+			print_reg();
+			char in[64];
+			while(1)
+			{
+				scanf("%s", in);
+				if(strcmp(in, "r") == 0)		// Check registers
+				{
+					print_reg();
+				}
+				else if(strcmp(in, "m") == 0)	// Check memory
+				{
+					Addr addr;
+					int n;
+					scanf("%llx %d", &addr, &n);
+					print_mem(addr, n);
+				}
+				else if(strcmp(in, "i") == 0)	// Check instructions
+				{
+					int n;
+					scanf("%d", &n);
+					print_inst(n);
+				}
+				else if(strcmp(in, "c") == 0)	// Continue
+				{
+					break;
+				}
+				else
+				{
+					printf("Command not understood\n");
+				}
+			}
+		}
 	}
 	
 	// Test...
-	printf("Registers:\n");
-	for(i = 0; i < Reg_number; i++)
-	{
-		printf("Reg %d: %lld\n", i, RegFile[i]);
-	}
+	print_reg();
 	
 	// Exit
 	fclose(fp2);
@@ -95,9 +130,38 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+void print_reg()
+{
+	printf("Registers:\n");
+	int i;
+	for(i = 0; i < Reg_number; i++)
+	{
+		printf("Reg %2d: %lld", i, RegFile[i]);
+		if(i % 4 == 3)
+			printf('\n');
+		else
+			printf('\t');
+	}
+}
 
+void print_mem(Addr addr, int n)	// n = the number of blocks(8 bytes) you want to check
+{
+	long long i;
+	for(i = addr; i < addr + n; i += 8)
+	{
+		printf("Mem addr %016llx:\t%016llx\n", i, *(unsigned long long*)memptr(i));
+	}
+}
 
-
+void print_inst(int n)
+{
+	printf("Instructions:\n");
+	long long i;
+	for(i = PC; i < PC + n*4; i += 4)
+	{
+		printf("%08x\n", i, *(unsigned int*)memptr(i));
+	}
+}
 
 
 
