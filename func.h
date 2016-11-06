@@ -421,6 +421,7 @@ int ALUR_64_func(int IF)
 			switch(funct7(IF))
 			{
 				case 0x0:ADDW(IF);break;//ADDW
+				case 0x1:MULW(IF);break;//MULW
 				case 0x20:SUBW(IF);break;//SUBW
 				default:
 				{
@@ -431,11 +432,13 @@ int ALUR_64_func(int IF)
 			break;
 		}
 		case 1:SLLW(IF);break;//SLLW
+		case 4:DIVW(IF);break;//DIVW
 		case 5:
 		{
 			switch(funct7(IF))
 			{
 				case 0:SRLW(IF);break;//SRLW
+				case 1:DIVUW(IF);break;//DIVUW
 				case 0x20:SRAW(IF);break;//SRAW
 				default:
 				{
@@ -445,6 +448,8 @@ int ALUR_64_func(int IF)
 			}
 			break;
 		}
+		case 6:REMW(IF);break;//REMW
+		case 7:REMUW(IF);break;//REMUW
 		default:
 		{
 			printf("ALUR_64 error!No such instruction\n");
