@@ -218,6 +218,7 @@ int ALUR_func(int IF)
 			switch(funct7(IF))
 			{
 				case 0:ADD(IF);break;//ADD
+				case 1:MUL(IF);break;//MUL
 				case 0x20:SUB(IF);break;//SUB
 				default:
 				{
@@ -227,17 +228,96 @@ int ALUR_func(int IF)
 			}
 			break;
 		}
-		case 4:XOR(IF);break;//XOR
-		case 6:OR(IF);break;//OR
-		case 7:AND(IF);break;//AND
-		case 1:SLL(IF);break;//SLL
-		case 2:SLT(IF);break;//SLT
-		case 3:SLTU(IF);break;//SLTU
+		case 4:
+		{
+			switch(func7(IF))
+			{
+				case 0:XOR(IF);break;//XOR
+				case 1:DIV(IF);break;//DIV
+				default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}	
+			}
+			break;
+		}
+		case 6:
+		{
+			switch(func7(IF))
+			{
+				case 0:OR(IF);break;//OR
+				case 1:REM(IF);break;//REM
+				default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}
+			}
+			break;
+		}
+		case 7:
+		{
+			switch(func7(IF))
+			{
+				case 0:AND(IF);break;//AND
+				case 1:REMU(IF);break;//REMU
+				default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}
+			}
+			break;
+		}
+		case 1:
+		{
+		      switch(func7(IF))
+		      {
+			      case 0:SLL(IF);break;//SLL
+			      case 1:MULH(IF);break;//MULH
+			      default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}
+		      }
+		      break;
+		}
+		case 2:
+		{
+			switch(func7(IF))
+			{
+				case 0:SLT(IF);break;//SLT
+				case 1:MULHSU(IF);break;//MULSHU
+				default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}	
+			}
+			break;
+		}
+		case 3:
+		{
+			switch(func7(IF))
+			{
+				case 0:SLTU(IF);break;//SLTU
+				case 1:MULHU(IF);break;//MULHU
+				default:
+				{
+					printf("ALUR error!No such instruction\n");
+					return 1;
+				}
+			}
+			break;
+		}
 		case 5:
 		{
 			switch(funct7(IF))
 			{
 				case 0:SRL(IF);break;//SRL
+				case 1:DIVU(IF);break;//DIVU
 				case 0x20:SRA(IF);break;//SRA
 				default:
 				{
