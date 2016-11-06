@@ -477,6 +477,31 @@ int Store_func(int IF)
 }
 int Syscall_func()
 {
+	     switch(RegFile[17])
+    {
+        case 48:;//faccessat
+        case 56:;//openat
+        case 57:;//close
+        case 62:;//lseek
+        case 63:;//read
+        case 64:;//write
+        case 79:;//fstatat
+        case 80:;//isatty,fstat
+        case 93:;//exit
+        case 169:;//times
+        case 214:;//sbrk
+        case 1024:;//open
+        case 1025:;//link
+        case 1026:;//unlink
+        case 1033:;//access
+        case 1038:;//stat
+        case 1039:;//lstat
+        default：
+        {
+            printf("Syscall_func error!No such instruction\n");
+            return 1;
+        }
+    }
 	return 0;
 }
 
