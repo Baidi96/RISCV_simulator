@@ -49,6 +49,39 @@ struct prog_head
 	unsigned long memsize;			// segment size in memory
 	unsigned long align;
 } p;
+
+void print_reg()
+{
+	printf("Registers:\n");
+	int i;
+	for(i = 0; i < Reg_number; i++)
+	{
+		printf("Reg %2d: %lld", i, RegFile[i]);
+		if(i % 4 == 3)
+			printf("\n");
+		else
+			printf("\t");
+	}
+}
+
+void print_mem(Addr addr, int n)	// n = the number of blocks(8 bytes) you want to check
+{
+	long long i;
+	for(i = addr; i < addr + n; i += 8)
+	{
+		printf("Mem addr %016llx:\t%016llx\n", i, *(unsigned long long*)memptr(i));
+	}
+}
+
+void print_inst(int n)
+{
+	printf("Instructions:\n");
+	long long i;
+	for(i = PC; i < PC + n*4; i += 4)
+	{
+		printf("%08x\n", *(unsigned int*)memptr(i));
+	}
+}
 	
 int main(int argc, char **argv)
 {
@@ -129,39 +162,4 @@ int main(int argc, char **argv)
 	fclose(fp);
 	return 0;
 }
-
-void print_reg()
-{
-	printf("Registers:\n");
-	int i;
-	for(i = 0; i < Reg_number; i++)
-	{
-		printf("Reg %2d: %lld", i, RegFile[i]);
-		if(i % 4 == 3)
-			printf('\n');
-		else
-			printf('\t');
-	}
-}
-
-void print_mem(Addr addr, int n)	// n = the number of blocks(8 bytes) you want to check
-{
-	long long i;
-	for(i = addr; i < addr + n; i += 8)
-	{
-		printf("Mem addr %016llx:\t%016llx\n", i, *(unsigned long long*)memptr(i));
-	}
-}
-
-void print_inst(int n)
-{
-	printf("Instructions:\n");
-	long long i;
-	for(i = PC; i < PC + n*4; i += 4)
-	{
-		printf("%08x\n", i, *(unsigned int*)memptr(i));
-	}
-}
-
-
 
