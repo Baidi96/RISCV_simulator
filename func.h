@@ -486,9 +486,9 @@ int Syscall_func()
         case 63:;//read
         case 64:;//write
         case 79:;//fstatat
-        case 80:;//isatty,fstat
+        case 80:;//fstat
         case 93:;//exit
-        case 169:;//times
+        case 169:;//gettimeofday
         case 214:;//sbrk
         case 1024:;//open
         case 1025:;//link
