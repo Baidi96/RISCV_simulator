@@ -46,9 +46,9 @@ int get_instruction()
 	PC += 4;
 	return IF;
 }
-
+extern int decode_and_run(int IF);
 int Fetch_Instruction()
-{
+{	
 	int IF = get_instruction();
 	int stat = decode_and_run(IF);
 	if(stat == 0)
@@ -375,13 +375,13 @@ int ALUR_64_func(int IF)
 }
 int Branch_func(int IF)
 {
+	int offset = ((IF>>7)&1)<<11;
+        	offset += ((IF>>8)&(1<<4-1))<<1;
+        	offset += ((IF>>25)&(1<<6-1))<<5;
+        	offset += ((IF>>31)&1)<<12;
 	switch(funct3(IF))
 	{
-        int offset = ((IF>>7)&1)<<11;
-        offset += ((IF>>8)&(1<<4-1))<<1;
-        offset += ((IF>>25)&(1<<6-1))<<5;
-        offset += ((IF>>31)&1)<<12;
-        case 0:{        //BEQ
+        	case 0:{        //BEQ
             if(RegFile[rs1(IF)]==RegFile[rs2(IF)])
                 PC += offset;
             break;
@@ -411,11 +411,10 @@ int Branch_func(int IF)
                 PC += offset;
             break;
         }
-		default:
-		{
-			printf("Branch_func error!No such instruction\n");
-			return 1;
-		}
+	default:{
+		printf("Branch_func error!No such instruction\n");
+		return 1;
+	}
 	}
 	return 0;
 }
@@ -425,8 +424,8 @@ int JAL_func(int IF)
     offset += ((IF>>20)&1)<<11;
     offset += ((IF>>21)&(1<<10-1))<<1;
     offset += ((IF>>31)&1)<<20;
-    RegFile[rd(IF)] = pc + 4;
-    pc +=offset;
+    RegFile[rd(IF)] = PC + 4;
+    PC +=offset;
     return 0;
 }
 int JALR_func(int IF)
@@ -435,8 +434,8 @@ int JALR_func(int IF)
     long long toAddress = (RegFile[rs1(IF)] + offset);
     if(toAddress&1)
         toAddress -=1;
-    RegFile[rd(IF)] = pc + 4;
-    pc = toAddress;
+    RegFile[rd(IF)] = PC + 4;
+    PC = toAddress;
     return 0;
 }
 int Load_func(int IF)
