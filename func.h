@@ -146,7 +146,7 @@ void SD(int IF)
 int AUIPC_func(int IF)      //RV32 function
 {
     long long imm = ((long long)IF >> 12) << 12;
-    RegFile[rd(IF)] = PC+ imm;
+    RegFile[rd(IF)] = PC + imm;
     return 0;
 }
 int LUI_func(int IF)        //RV32 function
@@ -376,12 +376,14 @@ int ALUR_64_func(int IF)
 int Branch_func(int IF)
 {
 	int offset = ((IF>>7)&1)<<11;
-        	offset += ((IF>>8)&(1<<4-1))<<1;
-        	offset += ((IF>>25)&(1<<6-1))<<5;
-        	offset += ((IF>>31)&1)<<12;
+        offset |= ((IF>>8)&0xF)<<1;
+        offset |= ((IF>>25)&0x3F)<<5;
+        offset |= (IF>>19);				// Signed extend
+        offset -= 4;					// If branch, restore current PC
+    
 	switch(funct3(IF))
 	{
-        	case 0:{        //BEQ
+        case 0:{        //BEQ
             if(RegFile[rs1(IF)]==RegFile[rs2(IF)])
                 PC += offset;
             break;

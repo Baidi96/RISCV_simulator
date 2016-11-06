@@ -56,7 +56,7 @@ void print_reg()
 	int i;
 	for(i = 0; i < Reg_number; i++)
 	{
-		printf("Reg %2d: %lld", i, RegFile[i]);
+		printf("Reg %2d: %08llx", i, RegFile[i]);
 		if(i % 4 == 3)
 			printf("\n");
 		else
@@ -69,7 +69,7 @@ void print_mem(Addr addr, int n)	// n = the number of blocks(8 bytes) you want t
 	long long i;
 	for(i = addr; i < addr + n; i += 8)
 	{
-		printf("Mem addr %016llx:\t%016llx\n", i, *(unsigned long long*)memptr(i));
+		printf("Mem addr 0x%016llx:\t%016llx\n", i, *(unsigned long long*)memptr(i));
 	}
 }
 
@@ -79,7 +79,7 @@ void print_inst(int n)
 	long long i;
 	for(i = PC; i < PC + n*4; i += 4)
 	{
-		printf("%08x\n", *(unsigned int*)memptr(i));
+		printf("0x%08x\n", *(unsigned int*)memptr(i));
 	}
 }
 	
@@ -110,10 +110,16 @@ int main(int argc, char **argv)
 	
 	init(e.e_entry);
 	int stat;
+	
+	PC = 0x10164;	// @Test
 	while(1)
 	{
 		int IF = get_instruction();
-		printf("IF = %x\n", IF);
+		if(debug)
+		{
+			printf("PC = 0x%016llx\n", PC-4);
+			printf("IF = 0x%08x\n", IF);
+		}
 		stat = decode_and_run(IF);
 		if(stat != 0)
 			break;
