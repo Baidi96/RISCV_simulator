@@ -511,7 +511,8 @@ int JAL_func(int IF)
     offset += ((IF>>20)&1)<<11;
     offset += ((IF>>21)&(1<<10-1))<<1;
     offset += ((IF>>31)&1)<<20;
-    RegFile[rd(IF)] = PC + 4;
+    if(rd(IF) != 0)
+        RegFile[rd(IF)] = PC + 4;
     PC +=offset;
     return 0;
 }
@@ -521,7 +522,8 @@ int JALR_func(int IF)
     long long toAddress = (RegFile[rs1(IF)] + offset);
     if(toAddress&1)
         toAddress -=1;
-    RegFile[rd(IF)] = PC + 4;
+    if(rd(IF) != 0)	
+        RegFile[rd(IF)] = PC + 4;
     PC = toAddress;
     return 0;
 }
