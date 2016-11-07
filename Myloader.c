@@ -109,9 +109,11 @@ int main(int argc, char **argv)
 	}
 	
 	init(e.e_entry);
-	int stat;
+	int stat = 0;
+	int single_step = debug;	// If debug, turn on single step by default
+	int run_until = 0;
+	Addr until_addr = 0;
 	
-	PC = 0x10164;	// @Test
 	while(1)
 	{
 		int IF = get_instruction();
@@ -119,12 +121,17 @@ int main(int argc, char **argv)
 		{
 			printf("PC = 0x%016llx\n", PC-4);
 			printf("IF = 0x%08x\n", IF);
+			if(run_until && PC-4 == until_addr)	// Arriving at run_until destination
+			{
+				run_until = 0;
+				single_step = 1;
+			}
 		}
 		stat = decode_and_run(IF);
 		if(stat != 0)
 			break;
 		
-		if(debug)								// In debug mode
+		if(single_step)							// In single step mode
 		{
 			print_reg();
 			char in[64];
@@ -139,7 +146,7 @@ int main(int argc, char **argv)
 				{
 					Addr addr;
 					int n;
-					scanf("%llx %d", &addr, &n);
+					scanf("%llx%d", &addr, &n);
 					print_mem(addr, n);
 				}
 				else if(strcmp(in, "i") == 0)	// Check instructions
@@ -147,6 +154,16 @@ int main(int argc, char **argv)
 					int n;
 					scanf("%d", &n);
 					print_inst(n);
+				}
+				else if(strcmp(in, "g") == 0)	// Run until
+				{
+					Addr addr;
+					scanf("%llx", &addr);
+					printf("Running until %016llx\n", addr);
+					run_until = 1;
+					until_addr = addr;
+					single_step = 0;
+					break;
 				}
 				else if(strcmp(in, "c") == 0)	// Continue
 				{

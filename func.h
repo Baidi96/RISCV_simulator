@@ -572,23 +572,21 @@ int Branch_func(int IF)
 }
 int JAL_func(int IF)
 {
-    int offset = ((IF>>12)&(1<<8-1))<<12;
-    offset += ((IF>>20)&1)<<11;
-    offset += ((IF>>21)&(1<<10-1))<<1;
-    offset += ((IF>>31)&1)<<20;
+    int offset = ((IF>>12) & 0xFF) << 12;
+    offset |= ((IF>>20) & 0x1) << 11;
+    offset |= ((IF>>21) & 0x3FF) << 1;
+    offset |= (IF>>11) & 0xFFF00000;
     if(rd(IF) != 0)
-        RegFile[rd(IF)] = PC + 4;
-    PC +=offset;
+        RegFile[rd(IF)] = PC;
+    PC += offset;
     return 0;
 }
 int JALR_func(int IF)
 {
-    int offset = ((IF>>20)&(1<<11-1));
-    long long toAddress = (RegFile[rs1(IF)] + offset);
-    if(toAddress&1)
-        toAddress -=1;
+    int offset = (IF >> 20);
+    Addr toAddress = (RegFile[rs1(IF)] + offset) & (~1);
     if(rd(IF) != 0)	
-        RegFile[rd(IF)] = PC + 4;
+        RegFile[rd(IF)] = PC;
     PC = toAddress;
     return 0;
 }
@@ -629,7 +627,7 @@ int Store_func(int IF)
 }
 int Syscall_func()
 {
-	 switch(RegFile[17])
+	switch(RegFile[17])
     {
         case 48:;//faccessat
         case 56:;//openat
@@ -638,8 +636,10 @@ int Syscall_func()
         case 63:;//read
         case 64:;//write
         case 79:;//fstatat
-        case 80:;//fstat
-        case 93:;//exit
+        case 80:	//fstat
+        	break;
+        case 93:	//exit
+        	return 1;
         case 169:;//gettimeofday
         case 214:;//sbrk
         case 1024:;//open
@@ -647,11 +647,12 @@ int Syscall_func()
         case 1026:;//unlink
         case 1033:;//access
         case 1038:;//stat
-        case 1039:;//lstat
+        case 1039:	//lstat
+        	break;
         default:
         {
-            printf("Syscall_func error!No such instruction\n");
-            return 1;
+            printf("Syscall_func error! No such instruction\n");
+            return 2;
         }
     }
 	return 0;
