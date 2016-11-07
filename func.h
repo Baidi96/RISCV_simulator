@@ -647,22 +647,26 @@ int Syscall_func()
         case 56:;//openat
         case 57:;//close
         case 62:;//lseek
-        case 63:;//read
-        case 64:;//write
+        case 63://read
+        {
+            RegFile[10]=read(RegFile[10],(void*)mem.getPaddr(RegFile[11]),RegFile[12]);
+            break;
+        }
+        case 64://write
+        {
+            RegFile[10]=write(RegFile[10],(const void*)mem.getPaddr(RegFile[11]),RegFile[12]);
+            break;
+        }
         case 79:;//fstatat
         case 80:	//fstat
         	break;
         case 93:	//exit
         	return 1;
         case 169:;//gettimeofday
-        case 214:;//sbrk
-        case 1024:;//open
-        case 1025:;//link
-        case 1026:;//unlink
-        case 1033:;//access
-        case 1038:;//stat
-        case 1039:	//lstat
-        	break;
+        case 214://sbrk
+	{
+        	return;
+	}
         default:
         {
             printf("Syscall_func error! No such instruction\n");
