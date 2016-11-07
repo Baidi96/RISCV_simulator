@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 	
 	// Test...
 	print_reg();
-	
+	printf("PC = %llx\n",PC);
 	// Exit
 	fclose(fp2);
 	fclose(fp);

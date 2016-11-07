@@ -11,11 +11,18 @@
 
 void* memptr(Addr addr)
 {
+	//if(Mem_size)
 	return (void*)(Mem + addr);
 }
 
 void read_memory(void* buff, int size, Addr mem_address)
 {
+	if(mem_address>=Mem_size)
+	{
+		printf("Out of size:%llu\n",mem_address);
+		//*(long long*)buff = 0;
+		return;
+	}
 	if(size == 1)
 		*(char*)buff = *(char*)memptr(mem_address);
 	else if(size == 2)
@@ -27,6 +34,12 @@ void read_memory(void* buff, int size, Addr mem_address)
 }
 void write_memory(void* buff, int size, Addr mem_address)
 {
+	if(mem_address>=Mem_size)
+	{
+		printf("Out of size:%llu\n",mem_address);
+		//*(long long*)buff = 0;
+		return;
+	}
 	if(size == 1)
 		*(char*)memptr(mem_address) = *(char*)buff;
 	else if(size == 2)
@@ -468,6 +481,7 @@ int ALUI_func(int IF)
 					return 1;
 				}
 			}
+			break;
 		}
 		default:
 		{
@@ -528,7 +542,7 @@ int Branch_func(int IF)
 	int offset = ((IF>>7)&1)<<11;
         offset |= ((IF>>8)&0xF)<<1;
         offset |= ((IF>>25)&0x3F)<<5;
-        offset |= (IF>>19);				// Signed extend
+        offset |= (IF>>19)&0xFFFFF000;				// Signed extend
         offset -= 4;					// If branch, restore current PC
     
 	switch(funct3(IF))
