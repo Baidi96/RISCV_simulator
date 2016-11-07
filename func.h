@@ -24,7 +24,7 @@ struct stat_rv {
  off_t      size;       //普通文件，对应的文件字节数
  time_t     atime;      //文件最后被访问的时间
  time_t     mtime;      //文件内容最后被修改的时间
- time_t     ctime;      //文件状态改变时间
+ time_t     ctime_;      //文件状态改变时间
  };
 
 void* memptr(Addr addr)
@@ -696,7 +696,7 @@ int Syscall_func()
             ptr->size = t.st_size;
             ptr->atime = t.st_atime;
             ptr->mtimet = t.st_mtime;
-            ptr->ctime = t.st_ctime;
+            ptr->ctime_ = t.st_ctime;
             break;
         }
         case 93://exit
