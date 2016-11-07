@@ -283,7 +283,7 @@ int ALUR_func(int IF)
 		}
 		case 4:
 		{
-			switch(func7(IF))
+			switch(funct7(IF))
 			{
 				case 0:XOR(IF);break;//XOR
 				case 1:DIV(IF);break;//DIV
@@ -617,7 +617,7 @@ int Store_func(int IF)
 }
 int Syscall_func()
 {
-	     switch(RegFile[17])
+	 switch(RegFile[17])
     {
         case 48:;//faccessat
         case 56:;//openat
@@ -644,8 +644,6 @@ int Syscall_func()
     }
 	return 0;
 }
-
-
 void init(Addr entry)
 {
 	memset(RegFile, 0, sizeof(RegFile));
