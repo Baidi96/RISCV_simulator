@@ -141,6 +141,59 @@ void SD(int IF)
 	write_memory(&RegFile[rs2(IF)],8,RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
 }
 
+void MUL(int IF)
+{
+    RegFile[rd(IF)] = RegFile[rs1(IF)] * RegFile[rs2(IF)];
+}
+void MULH(int IF)
+{
+    
+}
+void MULHSU(int IF)
+{
+    
+}
+void MULHU(int IF)
+{
+    
+}
+void DIV(int IF)
+{
+    
+}
+void DIVU(int IF)
+{
+    
+}
+void REM(int IF)
+{
+    
+}
+void REMU(int IF)
+{
+    
+}
+
+void MULW(int IF)
+{
+    
+}
+void DIVW(int IF)
+{
+    
+}
+void DIVUW(int IF)
+{
+    
+}
+void REMW(int IF)
+{
+    
+}
+void REMUW(int IF)
+{
+    
+}
 // Instruction category parsing
 
 int AUIPC_func(int IF)      //RV32 function
