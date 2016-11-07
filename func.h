@@ -131,25 +131,28 @@ void LD(int IF)
 void SB(int IF)
 {
 	char tmp=RegFile[rs2(IF)]&0XFF;
-	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	int imm = ((IF>>7) & 0x1F) | ((IF>>25) << 5);
 	write_memory(&tmp,sizeof(char),RegFile[rs1(IF)] + imm);
 }
 void SH(int IF)
 {
 	short tmp=RegFile[rs2(IF)]&0XFFFF;
-	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	int imm = ((IF>>7) & 0x1F) | ((IF>>25) << 5);
 	write_memory(&tmp,sizeof(short),RegFile[rs1(IF)] + imm);
 }
 void SW(int IF)
 {
 	int tmp=RegFile[rs2(IF)]&0XFFFFFFFF;
-	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	int imm = ((IF>>7) & 0x1F) | ((IF>>25) << 5);
+	// printf("Stored data = 0x%08x\n", tmp);
+	// printf("Offset = 0x%x\n", imm);
+	// printf("Stored addr = 0x%016llx\n", RegFile[rs1(IF)] + imm);
 	write_memory(&tmp,sizeof(int),RegFile[rs1(IF)] + imm);
 }
 void SD(int IF)
 {
 	long long tmp = RegFile[rs2(IF)];
-	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	int imm = ((IF>>7) & 0x1F) | ((IF>>25) << 5);
 	write_memory(&tmp,sizeof(long long),RegFile[rs1(IF)] + imm);
 }
 
