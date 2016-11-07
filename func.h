@@ -82,63 +82,75 @@ int Fetch_Instruction()
 void LB(int IF)
 {
 	char tmp;
-	read_memory(&tmp,sizeof(char),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	int imm = (IF >> 20);
+	read_memory(&tmp,sizeof(char),RegFile[rs1(IF)] + imm);
 	RegFile[rd(IF)]=(long long)tmp;
 }
 void LBU(int IF)
 {
 	unsigned char tmp;
-	read_memory(&tmp,sizeof(char),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	int imm = (IF >> 20);
+	read_memory(&tmp,sizeof(char),RegFile[rs1(IF)] + imm);
 	RegFile[rd(IF)]=(unsigned long long)tmp;
 }
 void LH(int IF)
 {
 	short tmp;
-	read_memory(&tmp,sizeof(short),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	int imm = (IF >> 20);
+	read_memory(&tmp,sizeof(short),RegFile[rs1(IF)] + imm);
 	RegFile[rd(IF)]=(long long)tmp;
 }
 void LHU(int IF)
 {
 	unsigned short tmp;
-	read_memory(&tmp,sizeof(short),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	int imm = (IF >> 20);
+	read_memory(&tmp,sizeof(short),RegFile[rs1(IF)] + imm);
 	RegFile[rd(IF)]=(unsigned long long)tmp;
 }
 void LW(int IF)
 {
 	int tmp;
-	read_memory(&tmp,sizeof(int),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	int imm = (IF >> 20);
+	read_memory(&tmp,sizeof(int),RegFile[rs1(IF)] + imm);
 	RegFile[rd(IF)]=(long long)tmp;
 }
 void LWU(int IF)
 {
 	unsigned int tmp;
-	read_memory(&tmp,sizeof(int),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	int imm = (IF >> 20);
+	read_memory(&tmp,sizeof(int),RegFile[rs1(IF)] + imm);
 	RegFile[rd(IF)]=(unsigned long long)tmp;
 }
 void LD(int IF)
 {
 	long long tmp;
-	read_memory(&tmp,sizeof(long long),RegFile[rs1(IF)]+((IF>>20)&((1<<12)-1)));
+	int imm = (IF >> 20);
+	read_memory(&tmp,sizeof(long long),RegFile[rs1(IF)] + imm);
 	RegFile[rd(IF)]=tmp;
 }
 void SB(int IF)
 {
 	char tmp=RegFile[rs2(IF)]&0XFF;
-	write_memory(&tmp,sizeof(char),RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	write_memory(&tmp,sizeof(char),RegFile[rs1(IF)] + imm);
 }
 void SH(int IF)
 {
 	short tmp=RegFile[rs2(IF)]&0XFFFF;
-	write_memory(&tmp,sizeof(short),RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	write_memory(&tmp,sizeof(short),RegFile[rs1(IF)] + imm);
 }
 void SW(int IF)
 {
 	int tmp=RegFile[rs2(IF)]&0XFFFFFFFF;
-	write_memory(&tmp,sizeof(int),RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	write_memory(&tmp,sizeof(int),RegFile[rs1(IF)] + imm);
 }
 void SD(int IF)
 {
-	write_memory(&RegFile[rs2(IF)],sizeof(long long),RegFile[rs1(IF)]+((IF>>7)&((1<<5)-1))+(((IF>>25)&((1<<7)-1))<<5));
+	long long tmp = RegFile[rs2(IF)];
+	int imm = ((IF>>7) & 0x1F) | (((IF>>25) & 0x7F) << 5);
+	write_memory(&tmp,sizeof(long long),RegFile[rs1(IF)] + imm);
 }
 
 void MUL(int IF)
@@ -297,7 +309,7 @@ int ALUR_func(int IF)
 		}
 		case 6:
 		{
-			switch(func7(IF))
+			switch(funct7(IF))
 			{
 				case 0:OR(IF);break;//OR
 				case 1:REM(IF);break;//REM
@@ -311,7 +323,7 @@ int ALUR_func(int IF)
 		}
 		case 7:
 		{
-			switch(func7(IF))
+			switch(funct7(IF))
 			{
 				case 0:AND(IF);break;//AND
 				case 1:REMU(IF);break;//REMU
@@ -325,7 +337,7 @@ int ALUR_func(int IF)
 		}
 		case 1:
 		{
-		      switch(func7(IF))
+		      switch(funct7(IF))
 		      {
 			      case 0:SLL(IF);break;//SLL
 			      case 1:MULH(IF);break;//MULH
@@ -339,7 +351,7 @@ int ALUR_func(int IF)
 		}
 		case 2:
 		{
-			switch(func7(IF))
+			switch(funct7(IF))
 			{
 				case 0:SLT(IF);break;//SLT
 				case 1:MULHSU(IF);break;//MULSHU
@@ -353,7 +365,7 @@ int ALUR_func(int IF)
 		}
 		case 3:
 		{
-			switch(func7(IF))
+			switch(funct7(IF))
 			{
 				case 0:SLTU(IF);break;//SLTU
 				case 1:MULHU(IF);break;//MULHU
@@ -593,7 +605,7 @@ int Load_func(int IF)
 		case 3:LD(IF);break;//LD
 		default:
 		{
-			printf("Load_func error!No such instruction\n");
+			printf("Load_func error! No such instruction\n");
 			return 1;
 		}
 	}
@@ -601,6 +613,8 @@ int Load_func(int IF)
 }
 int Store_func(int IF)
 {
+	printf("Store instruction: 0x%x\n", IF);
+	printf("Type = %d\n", funct3(IF));
 	switch(funct3(IF))
 	{
 		case 0:SB(IF);break;//SB
@@ -609,7 +623,7 @@ int Store_func(int IF)
 		case 3:SD(IF);break;//SD
 		default:
 		{
-			printf("Store_func error!No such instruction\n");
+			printf("Store_func error! No such instruction\n");
 			return 1;
 		}
 	}
@@ -636,7 +650,7 @@ int Syscall_func()
         case 1033:;//access
         case 1038:;//stat
         case 1039:;//lstat
-        default：
+        default:
         {
             printf("Syscall_func error!No such instruction\n");
             return 1;
