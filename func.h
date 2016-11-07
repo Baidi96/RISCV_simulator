@@ -465,14 +465,14 @@ int ALUI_func(int IF)
         }
 		case 5:
 		{
-			switch(funct7(IF))
+			switch(funct7(IF)>>1)
 			{
                 case 0:{   //SRLI
-                    RegFile[rd(IF)] = (unsigned long long)RegFile[rs1(IF)]>>rs2(IF);
+                    RegFile[rd(IF)] = (unsigned long long)RegFile[rs1(IF)]>>((IF>>20)&0x3F);
                     break;
                 }
-                case 0x20:{//SRAI
-                    RegFile[rd(IF)] = RegFile[rs1(IF)]>>rs2(IF);
+                case 0x10:{//SRAI
+                    RegFile[rd(IF)] = RegFile[rs1(IF)]>>((IF>>20)&0x3F);
                     break;
                 }
 				default:
