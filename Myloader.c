@@ -56,7 +56,7 @@ void print_reg()
 	int i;
 	for(i = 0; i < Reg_number; i++)
 	{
-		printf("Reg %2d: %08llx", i, RegFile[i]);
+		printf("Reg %2d: %016llx", i, RegFile[i]);
 		if(i % 4 == 3)
 			printf("\n");
 		else

@@ -17,9 +17,9 @@ void* memptr(Addr addr)
 
 void read_memory(void* buff, int size, Addr mem_address)
 {
-	if(mem_address>=Mem_size)
+	if(mem_address >= Mem_size)
 	{
-		printf("Out of size:%llu\n",mem_address);
+		printf("Read out of size: 0x%llx\n",mem_address);
 		//*(long long*)buff = 0;
 		return;
 	}
@@ -34,9 +34,9 @@ void read_memory(void* buff, int size, Addr mem_address)
 }
 void write_memory(void* buff, int size, Addr mem_address)
 {
-	if(mem_address>=Mem_size)
+	if(mem_address >= Mem_size)
 	{
-		printf("Out of size:%llu\n",mem_address);
+		printf("Write out of size: 0x%llx\n",mem_address);
 		//*(long long*)buff = 0;
 		return;
 	}
@@ -224,7 +224,7 @@ void REMUW(int IF)
 int AUIPC_func(int IF)      //RV32 function
 {
     long long imm = ((long long)IF >> 12) << 12;
-    RegFile[rd(IF)] = PC + imm;
+    RegFile[rd(IF)] = PC - 4 + imm;
     return 0;
 }
 int LUI_func(int IF)        //RV32 function
@@ -542,8 +542,8 @@ int Branch_func(int IF)
 	int offset = ((IF>>7)&1)<<11;
         offset |= ((IF>>8)&0xF)<<1;
         offset |= ((IF>>25)&0x3F)<<5;
-        offset |= (IF>>19)&0xFFFFF000;				// Signed extend
-        offset -= 4;					// If branch, restore current PC
+        offset |= (IF>>19)&0xFFFFF000;		// Signed extend
+        offset -= 4;						// If branch, restore current PC
     
 	switch(funct3(IF))
 	{
@@ -591,8 +591,8 @@ int JAL_func(int IF)
     offset |= ((IF>>21) & 0x3FF) << 1;
     offset |= (IF>>11) & 0xFFF00000;
     if(rd(IF) != 0)
-        RegFile[rd(IF)] = PC;
-    PC += offset;
+        RegFile[rd(IF)] = PC;		// Here PC = cur_PC + 4
+    PC = PC - 4 + offset;
     return 0;
 }
 int JALR_func(int IF)
