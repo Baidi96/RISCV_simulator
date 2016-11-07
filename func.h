@@ -8,6 +8,24 @@
 #endif
 
 #include <stdio.h>
+//syscall
+#include <time.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+struct stat_rv {
+ mode_t     smode;       //文件对应的模式，文件，目录等
+ ino_t      ino;       //inode节点号
+ dev_t      dev;        //设备号码
+ dev_t      rdev;       //特殊设备号码
+ nlink_t    nlink;      //文件的连接数
+ uid_t      uid;        //文件所有者
+ gid_t      gid;        //文件所有者对应的组
+ off_t      size;       //普通文件，对应的文件字节数
+ time_t     atime;      //文件最后被访问的时间
+ time_t     mtime;      //文件内容最后被修改的时间
+ time_t     ctime;      //文件状态改变时间
+ };
 
 void* memptr(Addr addr)
 {
@@ -641,12 +659,18 @@ int Store_func(int IF)
 }
 int Syscall_func()
 {
-	switch(RegFile[17])
+    switch(RegFile[17])
     {
-        case 48:;//faccessat
-        case 56:;//openat
-        case 57:;//close
-        case 62:;//lseek
+        case 57://close
+        {
+            RegFile[10]=close(RegFile[10]);
+            break;
+        }
+        case 62://lseek
+        {
+            RegFile[10]=lseek(RegFile[10],RegFile[11],RegFile[12]);
+            break;
+        }
         case 63://read
         {
             RegFile[10]=read(RegFile[10],(void*)mem.getPaddr(RegFile[11]),RegFile[12]);
@@ -657,24 +681,47 @@ int Syscall_func()
             RegFile[10]=write(RegFile[10],(const void*)mem.getPaddr(RegFile[11]),RegFile[12]);
             break;
         }
-        case 79:;//fstatat
-        case 80:	//fstat
-        	break;
-        case 93:	//exit
-        	return 1;
-        case 169:;//gettimeofday
-        case 214://sbrk
-	{
-        	return;
-	}
-        default:
+        case 80://fstat
         {
-            printf("Syscall_func error! No such instruction\n");
-            return 2;
+            struct stat t;
+            RegFile[10] = fstat(RegFile[10],&t);
+            struct stat_rv *ptr = (struct stat_rv *)mem.getPaddr(RegFile[11]);
+            ptr->dev = t.st_dev;
+            ptr->ino = t.st_ino;
+            ptr->mode = t.st_mode;
+            ptr->nlink = t.st_nlink;
+            ptr->uid = t.st_uid;
+            ptr->gid = t.st_gid;
+            ptr->rdev = t.st_rdev;
+            ptr->size = t.st_size;
+            ptr->atime = t.st_atime;
+            ptr->mtimet = t.st_mtime;
+            ptr->ctime = t.st_ctime;
+            break;
+        }
+        case 93://exit
+        {
+            RegFile[10]=exit(RegFile[10]);
+            break;
+        }
+        case 169://gettimeofday not 100% sure
+        {
+            RegFile[10]=time(RegFile[10]);
+            break;
+        }
+        case 214://sbrk
+        {
+            return;
+        }
+        default：
+        {
+            printf("Syscall_func error!No such instruction\n");
+            return 1;
         }
     }
-	return 0;
+    return 0;
 }
+
 void init(Addr entry)
 {
 	memset(RegFile, 0, sizeof(RegFile));
