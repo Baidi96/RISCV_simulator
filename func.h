@@ -144,9 +144,6 @@ void SW(int IF)
 {
 	int tmp=RegFile[rs2(IF)]&0XFFFFFFFF;
 	int imm = ((IF>>7) & 0x1F) | ((IF>>25) << 5);
-	// printf("Stored data = 0x%08x\n", tmp);
-	// printf("Offset = 0x%x\n", imm);
-	// printf("Stored addr = 0x%016llx\n", RegFile[rs1(IF)] + imm);
 	write_memory(&tmp,sizeof(int),RegFile[rs1(IF)] + imm);
 }
 void SD(int IF)
@@ -616,8 +613,6 @@ int Load_func(int IF)
 }
 int Store_func(int IF)
 {
-	printf("Store instruction: 0x%x\n", IF);
-	printf("Type = %d\n", funct3(IF));
 	switch(funct3(IF))
 	{
 		case 0:SB(IF);break;//SB
