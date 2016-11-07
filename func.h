@@ -14,8 +14,8 @@
 #include <sys/stat.h>
 
 struct stat_rv {
- mode_t     smode;       //文件对应的模式，文件，目录等
- ino_t      ino;       //inode节点号
+ mode_t     smode;      //文件对应的模式，文件，目录等
+ ino_t      ino;        //inode节点号
  dev_t      dev;        //设备号码
  dev_t      rdev;       //特殊设备号码
  nlink_t    nlink;      //文件的连接数
@@ -24,7 +24,7 @@ struct stat_rv {
  off_t      size;       //普通文件，对应的文件字节数
  time_t     atime;      //文件最后被访问的时间
  time_t     mtime;      //文件内容最后被修改的时间
- time_t     ctime_;      //文件状态改变时间
+ time_t     ctime_;     //文件状态改变时间
  };
 
 void* memptr(Addr addr)
