@@ -661,10 +661,10 @@ int Store_func(int IF)
 }
 int FLoad_func(int IF)
 {
-	if(funct3(IF) != 2)
+	if(rm(IF) != 2)
 	{
 		printf("FLoad_func error! Not an F-instruction\n");
-		return 1;
+		return 0;
 	}
 	// FLW
 	int imm = (IF >> 20);
@@ -675,10 +675,10 @@ int FLoad_func(int IF)
 }
 int FStore_func(int IF)
 {
-	if(funct3(IF) != 2)
+	if(rm(IF) != 2)
 	{
 		printf("FStore_func error! Not an F-instruction\n");
-		return 1;
+		return 0;
 	}
 	// FSW
 	int imm = ((IF >> 7) & 0x1F) | ((IF >> 25) << 5);
@@ -737,6 +737,43 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 			return 1;
 		}
 	}
+	else if(funct5(IF) == 0x18)	// FCVT.W[U].S
+	{
+		if(rs2(IF) == 0)		// FCVT.W.S
+		{
+			RegFile[rd(IF)] = (int)FRegFile[rs1(IF)];
+			return 0;
+		}
+		else if(rs2(IF) == 1)	// FCVT.WU.S
+		{
+			RegFile[rd(IF)] = (unsigned int)FRegFile[rs1(IF)];
+			return 0;
+		}
+		else
+		{
+			printf("FCVT.W[U].S error! No such instruction\n");
+			return 1;
+		}
+	}
+	else if(funct5(IF) == 0x1A)	// FCVT.S.W[U]
+	{
+		if(rs2(IF) == 0)		// FCVT.S.W
+		{
+			FRegFile[rd(IF)] = (float)(int)RegFile[rs1(IF)];
+			return 0;
+		}
+		else if(rs2(IF) == 1)	// FCVT.S.WU
+		{
+			FRegFile[rd(IF)] = (float)(unsigned int)RegFile[rs1(IF)];
+			return 0;
+		}
+		else
+		{
+			printf("FCVT.S.W[U] error! No such instruction\n");
+			return 1;
+		}
+	}
+	
 	printf("OP_FP_func error! No such instruction\n");
 	return 1;
 }
@@ -839,7 +876,7 @@ int SYSTEM_func()
         }
         default:
         {
-            printf("Syscall_func error!No such instruction\n");
+            printf("SYSTEM_func error!No such instruction\n");
             return 1;
         }
     }
