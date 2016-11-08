@@ -90,7 +90,7 @@ int Fetch_Instruction()
 		return 1;											// normal exit
 	else
 	{
-		printf("exec wrong in %d\n",*(int*)memptr(PC));		// show the erroneous instruction
+		printf("exec wrong in %d\n",*(int*)memptr(PC-4));	// show the erroneous instruction
 		return 2;											// abnormal exit
 	}
 }
@@ -267,7 +267,7 @@ int ALUI_64_func(int IF)
                 printf("Illegal instruction exception\n");
                 return 1;
             }
-            int shamt = (IF>>20)&(1<<6-1);
+            int shamt = (IF>>20)&0x1F;
             RegFile[rd(IF)] = (long long)((int)RegFile[rs1(IF)]<<shamt);
             break;
         }
@@ -280,7 +280,7 @@ int ALUI_64_func(int IF)
                         printf("Illegal instruction exception\n");
                         return 1;
                     }
-                    int shamt = (IF>>20)&(1<<6-1);
+                    int shamt = (IF>>20)&0x1F;
                     RegFile[rd(IF)] = (long long)((int)RegFile[rs1(IF)]>>shamt);
                     break;
                 }
@@ -289,8 +289,8 @@ int ALUI_64_func(int IF)
                         printf("Illegal instruction exception\n");
                         return 1;
                     }
-                    int shamt = (IF>>20)&(1<<6-1);
-                    RegFile[rd(IF)] = (long long)((unsigned int)RegFile[rs1(IF)]>>shamt);
+                    int shamt = (IF>>20)&0x1F;
+                    RegFile[rd(IF)] = (unsigned long long)((unsigned int)RegFile[rs1(IF)]>>shamt);
                     break;
                 }
             }
@@ -441,18 +441,16 @@ int ALUI_func(int IF)
 			break;
 		}
         case 2:{        //SLTI
-            signed int imm = IF >> 20;
-            long long imm64 = imm;
-            if(RegFile[rs1(IF)] < imm64)
+            long long imm = IF >> 20;
+            if(RegFile[rs1(IF)] < imm)
                 RegFile[rd(IF)] = 1;
             else
                 RegFile[rd(IF)] = 0;
             break;
         }
         case 3:{        //SLTIU
-            unsigned int imm = IF >> 20;
-            long long imm64 = imm;
-            if((unsigned)RegFile[rs1(IF)] < imm64)
+            long long imm = IF >> 20;
+            if((unsigned long long)RegFile[rs1(IF)] < (unsigned long long)imm)
                 RegFile[rd(IF)] = 1;
             else
                 RegFile[rd(IF)] = 0;
@@ -477,7 +475,7 @@ int ALUI_func(int IF)
             break;
         }
         case 1:{        //SLLI
-            RegFile[rd(IF)] = RegFile[rs1(IF)]<<rs2(IF);
+            RegFile[rd(IF)] = RegFile[rs1(IF)] << ((IF>>20)&0x3F);
             break;
         }
 		case 5:
