@@ -255,11 +255,11 @@ int LUI_func(int IF)        //RV32 function
 }
 int ALUI_64_func(int IF)
 {
-	switch(funct3(IF))
-	{
+    switch(funct3(IF))
+    {
         case 0:{           //ADDIW
             signed int imm = IF >> 20;
-            RegFile[rd(IF)] = RegFile[rs1(IF)] + imm;
+            RegFile[rd(IF)] = (long long)((int)RegFile[rs1(IF)] + imm);
             break;
         }
         case 1:{           //SLLIW
@@ -267,23 +267,21 @@ int ALUI_64_func(int IF)
                 printf("Illegal instruction exception\n");
                 return 1;
             }
-            int imm = RegFile[rs1(IF)]<<rs2(IF);
-            long long tmp = ~(1<<32-1);
-            RegFile[rd(IF)] = (RegFile[rd(IF)]&tmp) + imm;
+            int shamt = (IF>>20)&(1<<6-1);
+            RegFile[rd(IF)] = (long long)((int)RegFile[rs1(IF)]<<shamt);
             break;
         }
-		case 5:
-		{
-			switch(funct7(IF))
-			{
+        case 5:
+        {
+            switch(funct7(IF))
+            {
                 case 0x20:{//SRAIW
                     if((IF>>25)&1 !=0){
                         printf("Illegal instruction exception\n");
                         return 1;
                     }
-                    int imm = RegFile[rs1(IF)]>>rs2(IF);
-                    long long tmp = ~(1<<32-1);
-                    RegFile[rd(IF)] = (RegFile[rd(IF)]&tmp) + imm;
+                    int shamt = (IF>>20)&(1<<6-1);
+                    RegFile[rd(IF)] = (long long)((int)RegFile[rs1(IF)]>>shamt);
                     break;
                 }
                 case 0x00:{//SRLIW
@@ -291,21 +289,20 @@ int ALUI_64_func(int IF)
                         printf("Illegal instruction exception\n");
                         return 1;
                     }
-                    unsigned int imm = RegFile[rs1(IF)]>>rs2(IF);
-                    long long tmp = ~(1<<32-1);
-                    RegFile[rd(IF)] = (RegFile[rd(IF)]&tmp) + imm;
+                    int shamt = (IF>>20)&(1<<6-1);
+                    RegFile[rd(IF)] = (long long)((unsigned int)RegFile[rs1(IF)]>>shamt);
                     break;
                 }
-			} 
-			break;
-		}
-		default:
-			{
-				printf("ALUI_64 error!No such instruction\n");
-				return 1;
-			}
-	}
-	return 0;
+            }
+            break;
+        }
+        default:
+        {
+            printf("ALUI_64 error!No such instruction\n");
+            return 1;
+        }
+    }
+    return 0;
 }
 int ALUR_func(int IF)
 {
