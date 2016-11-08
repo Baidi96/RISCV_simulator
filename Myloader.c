@@ -113,14 +113,18 @@ int main(int argc, char **argv)
 	int single_step = debug;	// If debug, turn on single step by default
 	int run_until = 0;
 	Addr until_addr = 0;
+	int verbose = debug;
 	
 	while(1)
 	{
 		int IF = get_instruction();
 		if(debug)
 		{
-			printf("PC = 0x%016llx\n", PC-4);
-			printf("IF = 0x%08x\n", IF);
+			if(verbose || single_step)
+			{
+				printf("PC = 0x%016llx\n", PC-4);
+				printf("IF = 0x%08x\n", IF);
+			}
 			if(run_until && PC-4 == until_addr)	// Arriving at run_until destination
 			{
 				run_until = 0;
@@ -164,6 +168,14 @@ int main(int argc, char **argv)
 					until_addr = addr;
 					single_step = 0;
 					break;
+				}
+				else if(strcmp(in, "v") == 0)	// Verbose on/off
+				{
+					verbose = !verbose;
+					if(verbose)
+						printf("Verbose turned on\n");
+					else
+						printf("Verbose turned off\n");
 				}
 				else if(strcmp(in, "c") == 0)	// Continue
 				{

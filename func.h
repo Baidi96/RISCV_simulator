@@ -930,7 +930,7 @@ int SYSTEM_func(int IF)
 		{
 		    case 57://close
 		    {
-		        RegFile[10]=close(RegFile[10]);
+		        // RegFile[10]=close(RegFile[10]);
 		        break;
 		    }
 		    case 62://lseek
@@ -940,19 +940,19 @@ int SYSTEM_func(int IF)
 		    }
 		    case 63://read
 		    {
-		        RegFile[10]=read(RegFile[10],(void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
+		        RegFile[10]=read(RegFile[10],memptr(RegFile[11]),RegFile[12]);
 		        break;
 		    }
 		    case 64://write
 		    {
-		        RegFile[10]=write(RegFile[10],(const void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
+		        RegFile[10]=write(RegFile[10],(const void*)(memptr(RegFile[11])),RegFile[12]);
 		        break;
 		    }
 		    case 80://fstat
 		    {
 		        struct stat t;
 		        RegFile[10] = fstat(RegFile[10],&t);
-		        struct stat_rv *ptr = (struct stat_rv *)(*(long long*)memptr(RegFile[11]));
+		        struct stat_rv *ptr = (struct stat_rv *)(memptr(RegFile[11]));
 		        ptr->dev = t.st_dev;
 		        ptr->ino = t.st_ino;
 		        ptr->smode = t.st_mode;
@@ -968,12 +968,11 @@ int SYSTEM_func(int IF)
 		    }
 		    case 93://exit
 		    {
-		        exit(0);
-		        break;
+		        return 1;
 		    }
 		    case 169://gettimeofday not 100% sure
 		    {
-		        RegFile[10]=gettimeofday((struct timeval*)(RegFile[10]),NULL);
+		        RegFile[10] = gettimeofday((struct timeval*)memptr(RegFile[10]), NULL);
 		        break;
 		    }
 		    case 214://sbrk
