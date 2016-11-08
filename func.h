@@ -830,7 +830,7 @@ int SYSTEM_func()
         }
         case 169://gettimeofday not 100% sure
         {
-            RegFile[10]=time(RegFile[10]);
+            RegFile[10]=time((time_t *)RegFile[10]);
             break;
         }
         case 214://sbrk
