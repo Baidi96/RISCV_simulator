@@ -475,7 +475,7 @@ int ALUI_func(int IF)
             break;
         }
         case 1:{        //SLLI
-            RegFile[rd(IF)] = RegFile[rs1(IF)] << ((IF>>20)&0x3F);
+            RegFile[rd(IF)] = RegFile[rs1(IF)]<<((IF>>20)&0x3F);
             break;
         }
 		case 5:
