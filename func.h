@@ -719,7 +719,7 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 		FRegFile[rd(IF)] = sqrt(FRegFile[rs1(IF)]);
 		return 0;
 	}
-	else if(funct5(IF) == 0x5)	// FMIN/MAX
+	else if(funct5(IF) == 0x5)	// FMIN/MAX	(NaN not checked!)
 	{
 		if(rm(IF) == 0)			// FMIN.S
 		{
@@ -773,6 +773,112 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 			return 1;
 		}
 	}
+	else if(funct5(IF) == 0x4)	// FSGNJ
+	{
+		int src1 = *(int*)&FRegFile[rs1(IF)];
+		int src2 = *(int*)&FRegFile[rs1(IF)];
+		int sgn1 = ((src1 >> 31) << 31);
+		int sgn2 = ((src2 >> 31) << 31);
+		int sgn;
+		int val = src1 & 0x7FFFFFFF;
+		if(rm(IF) == 0)			// FSGNJ.S
+			sgn = sgn2;
+		else if(rm(IF) == 1)	// FSGNJN.S
+			sgn = sgn2 ^ (1 << 31);
+		else if(rm(IF) == 2)	// FSGNJX.S
+			sgn = sgn1 ^ sgn2;
+		else
+		{
+			printf("FSGNJ error! No such instruction\n");
+			return 1;
+		}
+		
+		int res = sgn | val;
+		FRegFile[rd(IF)] = *(float*)&res;
+		return 0;
+	}
+	else if(funct5(IF) == 0x1C)	// FMV.X.S or FCLASS.S
+	{
+		if(rm(IF) == 0)			// FMV.X.S
+		{
+			RegFile[rd(IF)] = *(int*)&FRegFile[rs1(IF)];
+			return 0;
+		}
+		else if(rm(IF) == 1)	// FCLASS.S
+		{
+			int type;
+			int tmp = *(int*)&FRegFile[rs1(IF)];
+			int S = (tmp >> 31) & 0x1;
+			int E = (tmp >> 23) & 0xFF;
+			int F = tmp & 0x7FFFFF;
+			if(E == 0xFF && F != 0)	// nan
+			{
+				if(F >> 22)			// quiet nan
+					type = 9;
+				else				// signaling nan
+					type = 8;
+			}
+			else if(S)				// negative
+			{
+				if(E == 0xFF)		// -inf
+					type = 0;
+				else if(E > 0)		// -norm
+					type = 1;
+				else if(F > 0)		// -subnorm
+					type = 2;
+				else				// -0
+					type = 3;
+			}
+			else					// positive
+			{
+				if(E == 0xFF)		// +inf
+					type = 7;
+				else if(E > 0)		// +norm
+					type = 6;
+				else if(F > 0)		// +subnorm
+					type = 5;
+				else				// +0
+					type = 4;
+			}
+			
+			RegFile[rd(IF)] = (1 << type);
+			return 0;
+		}
+	}
+	else if(funct5(IF) == 0x1E)	// FMV.S.X
+	{
+		if(rm(IF) != 0)
+		{
+			printf("FMV.S.X error! No such instruction\n");
+			return 1;
+		}
+		int tmp = RegFile[rs1(IF)];
+		FRegFile[rd(IF)] = *(float*)&tmp;
+		return 0;
+	}
+	else if(funct5(IF) == 0x14)	// FCMP (NaN not checked!)
+	{
+		if(rm(IF) == 2)			// FEQ.S
+		{
+			RegFile[rd(IF)] = (FRegFile[rs1(IF)] == FRegFile[rs2(IF)]);
+			return 0;
+		}
+		else if(rm(IF) == 1)	// FLT.S
+		{
+			RegFile[rd(IF)] = (FRegFile[rs1(IF)] < FRegFile[rs2(IF)]);
+			return 0;
+		}
+		else if(rm(IF) == 0)	// FLE.S
+		{
+			RegFile[rd(IF)] = (FRegFile[rs1(IF)] <= FRegFile[rs2(IF)]);
+			return 0;
+		}
+		else
+		{
+			printf("FCMP error! No such instruction\n");
+			return 1;
+		}
+	}
 	
 	printf("OP_FP_func error! No such instruction\n");
 	return 1;
@@ -820,6 +926,7 @@ int FNMSUB_func(int IF)
 
 int SYSTEM_func()
 {
+	printf("SYSTEM CALL: %d\n", (int)RegFile[17]);
     switch(RegFile[17])
     {
         case 57://close
@@ -834,19 +941,19 @@ int SYSTEM_func()
         }
         case 63://read
         {
-            RegFile[10]=read(RegFile[10],(void*)(RegFile[11]),RegFile[12]);
+            RegFile[10]=read(RegFile[10],(void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
             break;
         }
         case 64://write
         {
-            RegFile[10]=write(RegFile[10],(const void*)(RegFile[11]),RegFile[12]);
+            RegFile[10]=write(RegFile[10],(const void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
             break;
         }
         case 80://fstat
         {
             struct stat t;
             RegFile[10] = fstat(RegFile[10],&t);
-            struct stat_rv *ptr = (struct stat_rv *)(RegFile[11]);
+            struct stat_rv *ptr = (struct stat_rv *)(*(long long*)memptr(RegFile[11]));
             ptr->dev = t.st_dev;
             ptr->ino = t.st_ino;
             ptr->smode = t.st_mode;
