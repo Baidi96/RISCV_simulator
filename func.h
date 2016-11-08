@@ -723,12 +723,12 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 	{
 		if(rm(IF) == 0)			// FMIN.S
 		{
-			FRegFile[rd(IF)] = min(FRegFile[rs1(IF)], FRegFile[rs2(IF)]);
+			FRegFile[rd(IF)] = (FRegFile[rs1(IF)] < FRegFile[rs2(IF)]) ? FRegFile[rs1(IF)] : FRegFile[rs2(IF)];
 			return 0;
 		}
 		else if(rm(IF) == 1)	// FMAX.S
 		{
-			FRegFile[rd(IF)] = max(FRegFile[rs1(IF)], FRegFile[rs2(IF)]);
+			FRegFile[rd(IF)] = (FRegFile[rs1(IF)] > FRegFile[rs2(IF)]) ? FRegFile[rs1(IF)] : FRegFile[rs2(IF)];
 			return 0;
 		}
 		else
@@ -797,35 +797,35 @@ int SYSTEM_func()
         }
         case 63://read
         {
-            RegFile[10]=read(RegFile[10],(void*)mem.getPaddr(RegFile[11]),RegFile[12]);
+            RegFile[10]=read(RegFile[10],(void*)(RegFile[11]),RegFile[12]);
             break;
         }
         case 64://write
         {
-            RegFile[10]=write(RegFile[10],(const void*)mem.getPaddr(RegFile[11]),RegFile[12]);
+            RegFile[10]=write(RegFile[10],(const void*)(RegFile[11]),RegFile[12]);
             break;
         }
         case 80://fstat
         {
             struct stat t;
             RegFile[10] = fstat(RegFile[10],&t);
-            struct stat_rv *ptr = (struct stat_rv *)mem.getPaddr(RegFile[11]);
+            struct stat_rv *ptr = (struct stat_rv *)(RegFile[11]);
             ptr->dev = t.st_dev;
             ptr->ino = t.st_ino;
-            ptr->mode = t.st_mode;
+            ptr->smode = t.st_mode;
             ptr->nlink = t.st_nlink;
             ptr->uid = t.st_uid;
             ptr->gid = t.st_gid;
             ptr->rdev = t.st_rdev;
             ptr->size = t.st_size;
             ptr->atime = t.st_atime;
-            ptr->mtimet = t.st_mtime;
+            ptr->mtime = t.st_mtime;
             ptr->ctime_ = t.st_ctime;
             break;
         }
         case 93://exit
         {
-            RegFile[10]=exit(RegFile[10]);
+            exit(RegFile[10]);
             break;
         }
         case 169://gettimeofday not 100% sure
@@ -835,9 +835,9 @@ int SYSTEM_func()
         }
         case 214://sbrk
         {
-            return;
+            break;
         }
-        default：
+        default:
         {
             printf("Syscall_func error!No such instruction\n");
             return 1;
