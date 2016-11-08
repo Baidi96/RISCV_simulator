@@ -971,12 +971,12 @@ int SYSTEM_func(int IF)
 		    }
 		    case 93://exit
 		    {
-		        exit(RegFile[10]);
+		        exit(0);
 		        break;
 		    }
 		    case 169://gettimeofday not 100% sure
 		    {
-		        RegFile[10]=time((time_t *)RegFile[10]);
+		        RegFile[10]=gettimeofday((struct timeval*)(RegFile[10]),NULL);
 		        break;
 		    }
 		    case 214://sbrk
