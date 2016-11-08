@@ -924,69 +924,142 @@ int FNMSUB_func(int IF)
 	return 0;
 }
 
-int SYSTEM_func()
+int SYSTEM_func(int IF)
 {
-	printf("SYSTEM CALL: %d\n", (int)RegFile[17]);
-    switch(RegFile[17])
-    {
-        case 57://close
-        {
-            RegFile[10]=close(RegFile[10]);
-            break;
-        }
-        case 62://lseek
-        {
-            RegFile[10]=lseek(RegFile[10],RegFile[11],RegFile[12]);
-            break;
-        }
-        case 63://read
-        {
-            RegFile[10]=read(RegFile[10],(void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
-            break;
-        }
-        case 64://write
-        {
-            RegFile[10]=write(RegFile[10],(const void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
-            break;
-        }
-        case 80://fstat
-        {
-            struct stat t;
-            RegFile[10] = fstat(RegFile[10],&t);
-            struct stat_rv *ptr = (struct stat_rv *)(*(long long*)memptr(RegFile[11]));
-            ptr->dev = t.st_dev;
-            ptr->ino = t.st_ino;
-            ptr->smode = t.st_mode;
-            ptr->nlink = t.st_nlink;
-            ptr->uid = t.st_uid;
-            ptr->gid = t.st_gid;
-            ptr->rdev = t.st_rdev;
-            ptr->size = t.st_size;
-            ptr->atime = t.st_atime;
-            ptr->mtime = t.st_mtime;
-            ptr->ctime_ = t.st_ctime;
-            break;
-        }
-        case 93://exit
-        {
-            exit(RegFile[10]);
-            break;
-        }
-        case 169://gettimeofday not 100% sure
-        {
-            RegFile[10]=time((time_t *)RegFile[10]);
-            break;
-        }
-        case 214://sbrk
-        {
-            return;
-        }
-        default:
-        {
-            printf("SYSTEM_func error!No such instruction\n");
-            return 1;
-        }
-    }
+	if((IF >> 20) == 0)			// ECALL
+	{
+		printf("SYSTEM CALL: %d\n", (int)RegFile[17]);
+		switch(RegFile[17])
+		{
+		    case 57://close
+		    {
+		        RegFile[10]=close(RegFile[10]);
+		        break;
+		    }
+		    case 62://lseek
+		    {
+		        RegFile[10]=lseek(RegFile[10],RegFile[11],RegFile[12]);
+		        break;
+		    }
+		    case 63://read
+		    {
+		        RegFile[10]=read(RegFile[10],(void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
+		        break;
+		    }
+		    case 64://write
+		    {
+		        RegFile[10]=write(RegFile[10],(const void*)(*(long long*)memptr(RegFile[11])),RegFile[12]);
+		        break;
+		    }
+		    case 80://fstat
+		    {
+		        struct stat t;
+		        RegFile[10] = fstat(RegFile[10],&t);
+		        struct stat_rv *ptr = (struct stat_rv *)(*(long long*)memptr(RegFile[11]));
+		        ptr->dev = t.st_dev;
+		        ptr->ino = t.st_ino;
+		        ptr->smode = t.st_mode;
+		        ptr->nlink = t.st_nlink;
+		        ptr->uid = t.st_uid;
+		        ptr->gid = t.st_gid;
+		        ptr->rdev = t.st_rdev;
+		        ptr->size = t.st_size;
+		        ptr->atime = t.st_atime;
+		        ptr->mtime = t.st_mtime;
+		        ptr->ctime_ = t.st_ctime;
+		        break;
+		    }
+		    case 93://exit
+		    {
+		        exit(RegFile[10]);
+		        break;
+		    }
+		    case 169://gettimeofday not 100% sure
+		    {
+		        RegFile[10]=time((time_t *)RegFile[10]);
+		        break;
+		    }
+		    case 214://sbrk
+		    {
+		        return;
+		    }
+		    default:
+		    {
+		        printf("SYSTEM_func error!No such instruction\n");
+		        return 1;
+		    }
+		}
+	}
+	else if((IF >> 20) == 3)	// FxCSR
+	{
+		if(rm(IF) == 1)			// FSCSR
+		{
+			RegFile[rd(IF)] = fcsr;
+			fcsr = RegFile[rs1(IF)];
+			return 0;
+		}
+		else if(rm(IF) == 2)	// FRCSR
+		{
+			RegFile[rd(IF)] = fcsr;
+			return 0;
+		}
+		else
+		{
+			printf("FxCSR_func error! No such instruction\n");
+			return 1;
+		}
+	}
+	else if((IF >> 20) == 2)	// FxRM[I]
+	{
+		if(rm(IF) == 1)			// FSRM
+		{
+			RegFile[rd(IF)] = (fcsr >> 5) & 0x7;
+			fcsr = fcsr & (~0xE0) | ((RegFile[rs1(IF)] & 0x7) << 5);
+			return 0;
+		}
+		else if(rm(IF) == 2)	// FRRM
+		{
+			RegFile[rd(IF)] = (fcsr >> 5) & 0x7;
+			return 0;
+		}
+		else if(rm(IF) == 5)	// FSRMI
+		{
+			RegFile[rd(IF)] = (fcsr >> 5) & 0x7;
+			fcsr = (fcsr & (~0xE0)) | ((rs1(IF) & 0x7) << 5);
+			return 0;
+		}
+		else
+		{
+			printf("FxRM[I]_func error! No such instruction\n");
+			return 1;
+		}
+	}
+	else if((IF >> 20) == 1)	// FxFLAGS[I]
+	{
+		if(rm(IF) == 1)			// FSFLAGS
+		{
+			RegFile[rd(IF)] = fcsr & 0x1F;
+			fcsr = (fcsr & (~0x1F)) | (RegFile[rs1(IF)] & 0x1F);
+			return 0;
+		}
+		else if(rm(IF) == 2)	// FRFLAGS
+		{
+			RegFile[rd(IF)] = fcsr & 0x1F;
+			return 0;
+		}
+		else if(rm(IF) == 5)	// FSFLAGSI
+		{
+			RegFile[rd(IF)] = fcsr & 0x1F;
+			fcsr = (fcsr & (~0x1F)) | rs1(IF);
+			return 0;
+		}
+		else
+		{
+			printf("FxFLAGS[I]_func error! No such instruction\n");
+			return 1;
+		}
+	}
+		
     return 0;
 }
 

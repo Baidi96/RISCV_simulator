@@ -30,7 +30,7 @@ int decode_and_run(int IF)
  		case(JALR):
  			return JALR_func(IF);
 		case(SYSTEM):
-			return SYSTEM_func();
+			return SYSTEM_func(IF);
 		case(ALUI_64):
 			return ALUI_64_func(IF);
 		case(ALUR_64):
