@@ -7,7 +7,8 @@
 #include "arch.h"
 #endif
 
-#include <stdio.h>
+#include "stdio.h"
+#include "math.h"
 
 void* memptr(Addr addr)
 {
@@ -639,7 +640,129 @@ int Store_func(int IF)
 	}
 	return 0;
 }
-int Syscall_func()
+int FLoad_func(int IF)
+{
+	if(funct3(IF) != 2)
+	{
+		printf("FLoad_func error! Not an F-instruction\n");
+		return 1;
+	}
+	// FLW
+	int imm = (IF >> 20);
+	float tmp;
+	read_memory(&tmp, sizeof(float), RegFile[rs1(IF)] + imm);
+	FRegFile[rd(IF)] = tmp;
+	return 0;
+}
+int FStore_func(int IF)
+{
+	if(funct3(IF) != 2)
+	{
+		printf("FStore_func error! Not an F-instruction\n");
+		return 1;
+	}
+	// FSW
+	int imm = ((IF >> 7) & 0x1F) | ((IF >> 25) << 5);
+	float tmp = FRegFile[rs2(IF)];
+	write_memory(&tmp, sizeof(float), RegFile[rs1(IF)] + imm);
+	return 0;
+}
+int OP_FP_func(int IF)		// Did not check the rounding mode!
+{
+	if(fmt(IF) != 0)
+	{
+		printf("OP_FP_func error! Not an F-instruction\n");
+		return 1;
+	}
+	
+	if(funct5(IF) == 0)			// FADD.S
+	{
+		FRegFile[rd(IF)] = FRegFile[rs1(IF)] + FRegFile[rs2(IF)];
+		return 0;
+	}
+	else if(funct5(IF) == 0x1)	// FSUB.S
+	{
+		FRegFile[rd(IF)] = FRegFile[rs1(IF)] - FRegFile[rs2(IF)];
+		return 0;
+	}
+	else if(funct5(IF) == 0x2)	// FMUL.S
+	{
+		FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)];
+		return 0;
+	}
+	else if(funct5(IF) == 0x3)	// FDIV.S
+	{
+		FRegFile[rd(IF)] = FRegFile[rs1(IF)] / FRegFile[rs2(IF)];
+		return 0;
+	}
+	else if(funct5(IF) == 0xB)	// FSQRT.S
+	{
+		FRegFile[rd(IF)] = sqrt(FRegFile[rs1(IF)]);
+		return 0;
+	}
+	else if(funct5(IF) == 0x5)	// FMIN/MAX
+	{
+		if(rm(IF) == 0)			// FMIN.S
+		{
+			FRegFile[rd(IF)] = min(FRegFile[rs1(IF)], FRegFile[rs2(IF)]);
+			return 0;
+		}
+		else if(rm(IF) == 1)	// FMAX.S
+		{
+			FRegFile[rd(IF)] = max(FRegFile[rs1(IF)], FRegFile[rs2(IF)]);
+			return 0;
+		}
+		else
+		{
+			printf("FMIN/MAX error! No such instruction\n");
+			return 1;
+		}
+	}
+	printf("OP_FP_func error! No such instruction\n");
+	return 1;
+}
+int FMADD_func(int IF)
+{
+	if(fmt(IF) != 0)
+	{
+		printf("FMADD_func error! Not an F-instruction\n");
+		return 1;
+	}
+	FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)];
+	return 0;
+}
+int FMSUB_func(int IF)
+{
+	if(fmt(IF) != 0)
+	{
+		printf("FMSUB_func error! Not an F-instruction\n");
+		return 1;
+	}
+	FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)];
+	return 0;
+}
+int FNMADD_func(int IF)
+{
+	if(fmt(IF) != 0)
+	{
+		printf("FNMADD_func error! Not an F-instruction\n");
+		return 1;
+	}
+	FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)] );
+	return 0;
+}
+int FNMSUB_func(int IF)
+{
+	if(fmt(IF) != 0)
+	{
+		printf("FNMSUB_func error! Not an F-instruction\n");
+		return 1;
+	}
+	FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)] );
+	return 0;
+}
+
+int SYSTEM_func()
 {
 	switch(RegFile[17])
     {
@@ -665,7 +788,7 @@ int Syscall_func()
         	break;
         default:
         {
-            printf("Syscall_func error! No such instruction\n");
+            printf("SYSTEM_func error! No such instruction\n");
             return 2;
         }
     }
@@ -676,6 +799,7 @@ void init(Addr entry)
 	memset(RegFile, 0, sizeof(RegFile));
 	RegFile[2] = Stack_base;				// set sp
 	// gp, tp ?
+	memset(FRegFile, 0, sizeof(FRegFile));
 	
 	PC = entry;
 }

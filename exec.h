@@ -29,12 +29,26 @@ int decode_and_run(int IF)
 			return JAL_func(IF);
  		case(JALR):
  			return JALR_func(IF);
-		case(Syscall):
-			return Syscall_func();
+		case(SYSTEM):
+			return System_func();
 		case(ALUI_64):
 			return ALUI_64_func(IF);
 		case(ALUR_64):
 			return ALUR_64_func(IF);
+		case(FLoad):
+			return FLoad_func(IF);
+		case(FStore):
+			return FStore_func(IF);
+		case(OP_FP):
+			return OP_FP_func(IF);
+		case(FMADD):
+			return FMADD_func(IF);
+		case(FMSUB):
+			return FMSUB_func(IF);
+		case(FNMADD):
+			return FNMADD_func(IF);
+		case(FNMSUB):
+			return FNMSUB_func(IF);
 		default:
 		{
 			printf("error! No such opcode:%d\n",op);
