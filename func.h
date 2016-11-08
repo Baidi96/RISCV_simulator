@@ -872,7 +872,7 @@ int SYSTEM_func()
         }
         case 214://sbrk
         {
-            break;
+            return;
         }
         default:
         {
