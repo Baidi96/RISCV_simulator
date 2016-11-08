@@ -267,7 +267,7 @@ int ALUI_64_func(int IF)
                 printf("Illegal instruction exception\n");
                 return 1;
             }
-            int shamt = (IF>>20)&(1<<6-1);
+            int shamt = (IF>>20)&((1<<6)-1);
             RegFile[rd(IF)] = (long long)((int)RegFile[rs1(IF)]<<shamt);
             break;
         }
@@ -280,7 +280,7 @@ int ALUI_64_func(int IF)
                         printf("Illegal instruction exception\n");
                         return 1;
                     }
-                    int shamt = (IF>>20)&(1<<6-1);
+                    int shamt = (IF>>20)&((1<<6)-1);
                     RegFile[rd(IF)] = (long long)((int)RegFile[rs1(IF)]>>shamt);
                     break;
                 }
@@ -289,7 +289,7 @@ int ALUI_64_func(int IF)
                         printf("Illegal instruction exception\n");
                         return 1;
                     }
-                    int shamt = (IF>>20)&(1<<6-1);
+                    int shamt = (IF>>20)&((1<<6)-1);
                     RegFile[rd(IF)] = (long long)((unsigned int)RegFile[rs1(IF)]>>shamt);
                     break;
                 }
@@ -477,7 +477,7 @@ int ALUI_func(int IF)
             break;
         }
         case 1:{        //SLLI
-            RegFile[rd(IF)] = RegFile[rs1(IF)]<<rs2(IF);
+            RegFile[rd(IF)] = RegFile[rs1(IF)]<<((IF>>20)&0x3F);
             break;
         }
 		case 5:
