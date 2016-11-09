@@ -192,52 +192,124 @@ void MUL(int IF)
 }
 void MULH(int IF)
 {
-    
+    unsigned long long l1 = RegFile[rs1(IF)];
+    unsigned long long l2 = RegFile[rs2(IF)];
+    unsigned long long h1 = (long long)l1 >> 63;				// sign extend
+    unsigned long long h2 = (long long)l2 >> 63;				// sign extend
+    unsigned long long ll1 = l1 & 0xFFFFFFFF;
+    unsigned long long lh1 = l1 >> 32;
+    unsigned long long ll2 = l2 & 0xFFFFFFFF;
+    unsigned long long lh2 = l2 >> 32;
+    unsigned long long m64 = l1 * h2 + l2 * h1 + lh1 * lh2;		// (64b) * 2^64
+    unsigned long long m32_1 = (ll1 * ll2) >> 32;				// (64b) * 2^32
+    unsigned long long m32_2 = lh1 * ll2;
+    unsigned long long m32_3 = ll1 * lh2;
+    unsigned long long m32_l = (m32_1 & 0xFFFFFFFF) + (m32_2 & 0xFFFFFFFF) + (m32_3 & 0xFFFFFFFF);	// (32b) * 2^0
+    unsigned long long m32_h = (m32_1 >> 32) + (m32_2 >> 32) + (m32_3 >> 32);						// (32b) * 2^32
+    unsigned long long m32_co = m32_h + (m32_l >> 32);			// (b) * 2^64 (= m32 >> 32)
+    m64 += m32_co;
+    RegFile[rd(IF)] = m64;
 }
 void MULHSU(int IF)
 {
-    
+    unsigned long long l1 = RegFile[rs1(IF)];
+    unsigned long long l2 = RegFile[rs2(IF)];
+    unsigned long long h1 = (long long)l1 >> 63;				// sign extend
+    unsigned long long h2 = 0;									// zero extend
+    unsigned long long ll1 = l1 & 0xFFFFFFFF;
+    unsigned long long lh1 = l1 >> 32;
+    unsigned long long ll2 = l2 & 0xFFFFFFFF;
+    unsigned long long lh2 = l2 >> 32;
+    unsigned long long m64 = l1 * h2 + l2 * h1 + lh1 * lh2;		// (64b) * 2^64
+    unsigned long long m32_1 = (ll1 * ll2) >> 32;				// (64b) * 2^32
+    unsigned long long m32_2 = lh1 * ll2;
+    unsigned long long m32_3 = ll1 * lh2;
+    unsigned long long m32_l = (m32_1 & 0xFFFFFFFF) + (m32_2 & 0xFFFFFFFF) + (m32_3 & 0xFFFFFFFF);	// (32b) * 2^0
+    unsigned long long m32_h = (m32_1 >> 32) + (m32_2 >> 32) + (m32_3 >> 32);						// (32b) * 2^32
+    unsigned long long m32_co = m32_h + (m32_l >> 32);			// (b) * 2^64 (= m32 >> 32)
+    m64 += m32_co;
+    RegFile[rd(IF)] = m64;
 }
 void MULHU(int IF)
 {
-    
+    unsigned long long l1 = RegFile[rs1(IF)];
+    unsigned long long l2 = RegFile[rs2(IF)];
+    unsigned long long h1 = 0;									// zero extend
+    unsigned long long h2 = 0;									// zero extend
+    unsigned long long ll1 = l1 & 0xFFFFFFFF;
+    unsigned long long lh1 = l1 >> 32;
+    unsigned long long ll2 = l2 & 0xFFFFFFFF;
+    unsigned long long lh2 = l2 >> 32;
+    unsigned long long m64 = l1 * h2 + l2 * h1 + lh1 * lh2;		// (64b) * 2^64
+    unsigned long long m32_1 = (ll1 * ll2) >> 32;				// (64b) * 2^32
+    unsigned long long m32_2 = lh1 * ll2;
+    unsigned long long m32_3 = ll1 * lh2;
+    unsigned long long m32_l = (m32_1 & 0xFFFFFFFF) + (m32_2 & 0xFFFFFFFF) + (m32_3 & 0xFFFFFFFF);	// (32b) * 2^0
+    unsigned long long m32_h = (m32_1 >> 32) + (m32_2 >> 32) + (m32_3 >> 32);						// (32b) * 2^32
+    unsigned long long m32_co = m32_h + (m32_l >> 32);			// (b) * 2^64 (= m32 >> 32)
+    m64 += m32_co;
+    RegFile[rd(IF)] = m64;
 }
 void DIV(int IF)
 {
-    
+	if(RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = -1;		// Divided by 0 semantic
+	else
+    	RegFile[rd(IF)] = RegFile[rs1(IF)] / RegFile[rs2(IF)];
 }
 void DIVU(int IF)
 {
-    
+	if(RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = -1;
+	else
+    	RegFile[rd(IF)] = (unsigned long long)RegFile[rs1(IF)] / (unsigned long long)RegFile[rs2(IF)];
 }
 void REM(int IF)
 {
-    
+	if(RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = RegFile[rs1(IF)];
+	else
+    	RegFile[rd(IF)] = RegFile[rs1(IF)] % RegFile[rs2(IF)];
 }
 void REMU(int IF)
 {
-    
+	if(RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = RegFile[rs1(IF)];
+	else
+    	RegFile[rd(IF)] = (unsigned long long)RegFile[rs1(IF)] % (unsigned long long)RegFile[rs2(IF)];
 }
 
 void MULW(int IF)
 {
-    
+    RegFile[rd(IF)] = (int)RegFile[rs1(IF)] * (int)RegFile[rs2(IF)];
 }
 void DIVW(int IF)
 {
-    
+	if((int)RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = -1;
+	else
+    	RegFile[rd(IF)] = (int)RegFile[rs1(IF)] / (int)RegFile[rs2(IF)];
 }
 void DIVUW(int IF)
 {
-    
+	if((int)RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = -1;
+	else
+    	RegFile[rd(IF)] = (unsigned long long)((unsigned int)RegFile[rs1(IF)] / (unsigned int)RegFile[rs2(IF)]);
 }
 void REMW(int IF)
 {
-    
+	if((int)RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = (int)RegFile[rs1(IF)];
+	else
+    	RegFile[rd(IF)] = (int)RegFile[rs1(IF)] % (int)RegFile[rs2(IF)];
 }
 void REMUW(int IF)
 {
-    
+	if((int)RegFile[rs2(IF)] == 0)
+		RegFile[rd(IF)] = (unsigned long long)((unsigned int)RegFile[rs1(IF)]);
+	else
+    	RegFile[rd(IF)] = (unsigned long long)((unsigned int)RegFile[rs1(IF)] % (unsigned int)RegFile[rs2(IF)]);
 }
 // Instruction category parsing
 
