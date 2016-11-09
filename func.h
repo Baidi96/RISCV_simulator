@@ -923,7 +923,7 @@ int SYSTEM_func(int IF)
 {
 	if((IF >> 20) == 0)			// ECALL
 	{
-		printf("SYSTEM CALL: %d\n", (int)RegFile[17]);
+		// printf("SYSTEM CALL: %d\n", (int)RegFile[17]);
 		switch(RegFile[17])
 		{
 		    case 57://close
@@ -975,7 +975,8 @@ int SYSTEM_func(int IF)
 		    }
 		    case 214://sbrk
 		    {
-		        return;
+		    	// RegFile[10] = 0;	// return 'success' ? 
+		        break;
 		    }
 		    default:
 		    {

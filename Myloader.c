@@ -191,7 +191,7 @@ int main(int argc, char **argv)
 	
 	// Test...
 	print_reg();
-	printf("PC = %llx\n",PC);
+	printf("PC = %llx\n",PC-4);
 	// Exit
 	fclose(fp2);
 	fclose(fp);
