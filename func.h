@@ -730,7 +730,7 @@ int FLoad_func(int IF)
 {
 	if(rm(IF) != 2)
 	{
-		printf("FLoad_func error! Not an F-instruction\n");
+		// printf("FLoad_func error! Not an F-instruction\n");
 		return 0;
 	}
 	// FLW
@@ -744,7 +744,7 @@ int FStore_func(int IF)
 {
 	if(rm(IF) != 2)
 	{
-		printf("FStore_func error! Not an F-instruction\n");
+		// printf("FStore_func error! Not an F-instruction\n");
 		return 0;
 	}
 	// FSW
@@ -757,7 +757,7 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 {
 	if(fmt(IF) != 0)
 	{
-		printf("OP_FP_func error! Not an F-instruction\n");
+		// printf("OP_FP_func error! Not an F-instruction\n");
 		return 1;
 	}
 	
@@ -800,7 +800,7 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 		}
 		else
 		{
-			printf("FMIN/MAX error! No such instruction\n");
+			// printf("FMIN/MAX error! No such instruction\n");
 			return 1;
 		}
 	}
@@ -818,7 +818,7 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 		}
 		else
 		{
-			printf("FCVT.W[U].S error! No such instruction\n");
+			// printf("FCVT.W[U].S error! No such instruction\n");
 			return 1;
 		}
 	}
@@ -836,7 +836,7 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 		}
 		else
 		{
-			printf("FCVT.S.W[U] error! No such instruction\n");
+			// printf("FCVT.S.W[U] error! No such instruction\n");
 			return 1;
 		}
 	}
@@ -856,7 +856,7 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 			sgn = sgn1 ^ sgn2;
 		else
 		{
-			printf("FSGNJ error! No such instruction\n");
+			// printf("FSGNJ error! No such instruction\n");
 			return 1;
 		}
 		
@@ -916,7 +916,7 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 	{
 		if(rm(IF) != 0)
 		{
-			printf("FMV.S.X error! No such instruction\n");
+			// printf("FMV.S.X error! No such instruction\n");
 			return 1;
 		}
 		int tmp = RegFile[rs1(IF)];
@@ -942,19 +942,19 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 		}
 		else
 		{
-			printf("FCMP error! No such instruction\n");
+			// printf("FCMP error! No such instruction\n");
 			return 1;
 		}
 	}
 	
-	printf("OP_FP_func error! No such instruction\n");
+	// printf("OP_FP_func error! No such instruction\n");
 	return 1;
 }
 int FMADD_func(int IF)
 {
 	if(fmt(IF) != 0)
 	{
-		printf("FMADD_func error! Not an F-instruction\n");
+		// printf("FMADD_func error! Not an F-instruction\n");
 		return 1;
 	}
 	FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)];
@@ -964,7 +964,7 @@ int FMSUB_func(int IF)
 {
 	if(fmt(IF) != 0)
 	{
-		printf("FMSUB_func error! Not an F-instruction\n");
+		// printf("FMSUB_func error! Not an F-instruction\n");
 		return 1;
 	}
 	FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)];
@@ -974,7 +974,7 @@ int FNMADD_func(int IF)
 {
 	if(fmt(IF) != 0)
 	{
-		printf("FNMADD_func error! Not an F-instruction\n");
+		// printf("FNMADD_func error! Not an F-instruction\n");
 		return 1;
 	}
 	FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)] );
@@ -984,7 +984,7 @@ int FNMSUB_func(int IF)
 {
 	if(fmt(IF) != 0)
 	{
-		printf("FNMSUB_func error! Not an F-instruction\n");
+		// printf("FNMSUB_func error! Not an F-instruction\n");
 		return 1;
 	}
 	FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)] );
