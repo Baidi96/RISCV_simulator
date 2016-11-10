@@ -823,11 +823,18 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 				RegFile[rd(IF)] = (unsigned int)FRegFile[rs1(IF)];
 				return 0;
 			}
-			else
+			else if(rs2(IF) == 2)	// FCVT.L.S
 			{
-				// printf("FCVT.W[U].S error! No such instruction\n");
-				return 1;
+				RegFile[rd(IF)] = (long long)FRegFile[rs1(IF)];
+				return 0;
 			}
+			else if(rs2(IF) == 3)	// FCVT.LU.S
+			{
+				RegFile[rd(IF)] = (unsigned long long)FRegFile[rs1(IF)];
+				return 0;
+			}
+			// printf("FCVT.x.S error! No such instruction\n");
+			return 1;
 		}
 		else if(funct5(IF) == 0x1A)	// FCVT.S.W[U]
 		{
@@ -841,11 +848,18 @@ int OP_FP_func(int IF)		// Did not check the rounding mode!
 				FRegFile[rd(IF)] = (float)(unsigned int)RegFile[rs1(IF)];
 				return 0;
 			}
-			else
+			else if(rs2(IF) == 2)	// FCVT.S.L
 			{
-				// printf("FCVT.S.W[U] error! No such instruction\n");
-				return 1;
+				FRegFile[rd(IF)] = (float)RegFile[rs1(IF)];
+				return 0;
 			}
+			else if(rs2(IF) == 3)	// FCVT.S.LU
+			{
+				FRegFile[rd(IF)] = (float)(unsigned long long)RegFile[rs1(IF)];
+				return 0;
+			}
+			// printf("FCVT.S.x error! No such instruction\n");
+			return 1;
 		}
 		else if(funct5(IF) == 0x8)	// FCVT.S.D
 		{
