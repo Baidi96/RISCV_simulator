@@ -728,267 +728,504 @@ int Store_func(int IF)
 }
 int FLoad_func(int IF)
 {
-	if(rm(IF) != 2)
+	if(rm(IF) == 2)			// FLW
 	{
-		// printf("FLoad_func error! Not an F-instruction\n");
+		int imm = (IF >> 20);
+		float tmp;
+		read_memory(&tmp, sizeof(float), RegFile[rs1(IF)] + imm);
+		FRegFile[rd(IF)] = tmp;
 		return 0;
 	}
-	// FLW
-	int imm = (IF >> 20);
-	float tmp;
-	read_memory(&tmp, sizeof(float), RegFile[rs1(IF)] + imm);
-	FRegFile[rd(IF)] = tmp;
-	return 0;
+	else if(rm(IF) == 3)	// FLD
+	{
+		int imm = (IF >> 20);
+		double tmp;
+		read_memory(&tmp, sizeof(double), RegFile[rs1(IF)] + imm);
+		DRegFile[rd(IF)] = tmp;
+		return 0;
+	}
+	return 1;
 }
 int FStore_func(int IF)
 {
-	if(rm(IF) != 2)
+	if(rm(IF) == 2)			// FSW
 	{
-		// printf("FStore_func error! Not an F-instruction\n");
+		int imm = ((IF >> 7) & 0x1F) | ((IF >> 25) << 5);
+		float tmp = FRegFile[rs2(IF)];
+		write_memory(&tmp, sizeof(float), RegFile[rs1(IF)] + imm);
 		return 0;
 	}
-	// FSW
-	int imm = ((IF >> 7) & 0x1F) | ((IF >> 25) << 5);
-	float tmp = FRegFile[rs2(IF)];
-	write_memory(&tmp, sizeof(float), RegFile[rs1(IF)] + imm);
-	return 0;
+	else if(rm(IF) == 3)	// FSD
+	{
+		int imm = ((IF >> 7) & 0x1F) | ((IF >> 25) << 5);
+		double tmp = DRegFile[rs2(IF)];
+		write_memory(&tmp, sizeof(double), RegFile[rs1(IF)] + imm);
+		return 0;
+	}
+	return 1;
 }
 int OP_FP_func(int IF)		// Did not check the rounding mode!
 {
-	if(fmt(IF) != 0)
+	if(fmt(IF) == 0)		// (Mainly) F instructions
 	{
-		// printf("OP_FP_func error! Not an F-instruction\n");
-		return 1;
-	}
-	
-	if(funct5(IF) == 0)			// FADD.S
-	{
-		FRegFile[rd(IF)] = FRegFile[rs1(IF)] + FRegFile[rs2(IF)];
-		return 0;
-	}
-	else if(funct5(IF) == 0x1)	// FSUB.S
-	{
-		FRegFile[rd(IF)] = FRegFile[rs1(IF)] - FRegFile[rs2(IF)];
-		return 0;
-	}
-	else if(funct5(IF) == 0x2)	// FMUL.S
-	{
-		FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)];
-		return 0;
-	}
-	else if(funct5(IF) == 0x3)	// FDIV.S
-	{
-		FRegFile[rd(IF)] = FRegFile[rs1(IF)] / FRegFile[rs2(IF)];
-		return 0;
-	}
-	else if(funct5(IF) == 0xB)	// FSQRT.S
-	{
-		FRegFile[rd(IF)] = sqrt(FRegFile[rs1(IF)]);
-		return 0;
-	}
-	else if(funct5(IF) == 0x5)	// FMIN/MAX	(NaN not checked!)
-	{
-		if(rm(IF) == 0)			// FMIN.S
+		if(funct5(IF) == 0)			// FADD.S
 		{
-			FRegFile[rd(IF)] = (FRegFile[rs1(IF)] < FRegFile[rs2(IF)]) ? FRegFile[rs1(IF)] : FRegFile[rs2(IF)];
+			FRegFile[rd(IF)] = FRegFile[rs1(IF)] + FRegFile[rs2(IF)];
 			return 0;
 		}
-		else if(rm(IF) == 1)	// FMAX.S
+		else if(funct5(IF) == 0x1)	// FSUB.S
 		{
-			FRegFile[rd(IF)] = (FRegFile[rs1(IF)] > FRegFile[rs2(IF)]) ? FRegFile[rs1(IF)] : FRegFile[rs2(IF)];
+			FRegFile[rd(IF)] = FRegFile[rs1(IF)] - FRegFile[rs2(IF)];
 			return 0;
 		}
-		else
+		else if(funct5(IF) == 0x2)	// FMUL.S
 		{
-			// printf("FMIN/MAX error! No such instruction\n");
-			return 1;
-		}
-	}
-	else if(funct5(IF) == 0x18)	// FCVT.W[U].S
-	{
-		if(rs2(IF) == 0)		// FCVT.W.S
-		{
-			RegFile[rd(IF)] = (int)FRegFile[rs1(IF)];
+			FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)];
 			return 0;
 		}
-		else if(rs2(IF) == 1)	// FCVT.WU.S
+		else if(funct5(IF) == 0x3)	// FDIV.S
 		{
-			RegFile[rd(IF)] = (unsigned int)FRegFile[rs1(IF)];
+			FRegFile[rd(IF)] = FRegFile[rs1(IF)] / FRegFile[rs2(IF)];
 			return 0;
 		}
-		else
+		else if(funct5(IF) == 0xB)	// FSQRT.S
 		{
-			// printf("FCVT.W[U].S error! No such instruction\n");
-			return 1;
-		}
-	}
-	else if(funct5(IF) == 0x1A)	// FCVT.S.W[U]
-	{
-		if(rs2(IF) == 0)		// FCVT.S.W
-		{
-			FRegFile[rd(IF)] = (float)(int)RegFile[rs1(IF)];
+			FRegFile[rd(IF)] = sqrt(FRegFile[rs1(IF)]);
 			return 0;
 		}
-		else if(rs2(IF) == 1)	// FCVT.S.WU
+		else if(funct5(IF) == 0x5)	// FMIN/MAX.S (NaN not checked!)
 		{
-			FRegFile[rd(IF)] = (float)(unsigned int)RegFile[rs1(IF)];
+			if(rm(IF) == 0)			// FMIN.S
+			{
+				FRegFile[rd(IF)] = (FRegFile[rs1(IF)] < FRegFile[rs2(IF)]) ? FRegFile[rs1(IF)] : FRegFile[rs2(IF)];
+				return 0;
+			}
+			else if(rm(IF) == 1)	// FMAX.S
+			{
+				FRegFile[rd(IF)] = (FRegFile[rs1(IF)] > FRegFile[rs2(IF)]) ? FRegFile[rs1(IF)] : FRegFile[rs2(IF)];
+				return 0;
+			}
+			else
+			{
+				// printf("FMIN/MAX.S error! No such instruction\n");
+				return 1;
+			}
+		}
+		else if(funct5(IF) == 0x18)	// FCVT.W[U].S
+		{
+			if(rs2(IF) == 0)		// FCVT.W.S
+			{
+				RegFile[rd(IF)] = (int)FRegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 1)	// FCVT.WU.S
+			{
+				RegFile[rd(IF)] = (unsigned int)FRegFile[rs1(IF)];
+				return 0;
+			}
+			else
+			{
+				// printf("FCVT.W[U].S error! No such instruction\n");
+				return 1;
+			}
+		}
+		else if(funct5(IF) == 0x1A)	// FCVT.S.W[U]
+		{
+			if(rs2(IF) == 0)		// FCVT.S.W
+			{
+				FRegFile[rd(IF)] = (float)(int)RegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 1)	// FCVT.S.WU
+			{
+				FRegFile[rd(IF)] = (float)(unsigned int)RegFile[rs1(IF)];
+				return 0;
+			}
+			else
+			{
+				// printf("FCVT.S.W[U] error! No such instruction\n");
+				return 1;
+			}
+		}
+		else if(funct5(IF) == 0x8)	// FCVT.S.D
+		{
+			FRegFile[rd(IF)] = DRegFile[rs1(IF)];
 			return 0;
 		}
-		else
+		else if(funct5(IF) == 0x4)	// FSGNJ.S
 		{
-			// printf("FCVT.S.W[U] error! No such instruction\n");
-			return 1;
-		}
-	}
-	else if(funct5(IF) == 0x4)	// FSGNJ
-	{
-		int src1 = *(int*)&FRegFile[rs1(IF)];
-		int src2 = *(int*)&FRegFile[rs1(IF)];
-		int sgn1 = ((src1 >> 31) << 31);
-		int sgn2 = ((src2 >> 31) << 31);
-		int sgn;
-		int val = src1 & 0x7FFFFFFF;
-		if(rm(IF) == 0)			// FSGNJ.S
-			sgn = sgn2;
-		else if(rm(IF) == 1)	// FSGNJN.S
-			sgn = sgn2 ^ (1 << 31);
-		else if(rm(IF) == 2)	// FSGNJX.S
-			sgn = sgn1 ^ sgn2;
-		else
-		{
-			// printf("FSGNJ error! No such instruction\n");
-			return 1;
-		}
+			int src1 = *(int*)&FRegFile[rs1(IF)];
+			int src2 = *(int*)&FRegFile[rs2(IF)];
+			int sgn1 = ((src1 >> 31) << 31);
+			int sgn2 = ((src2 >> 31) << 31);
+			int sgn;
+			int val = src1 & 0x7FFFFFFF;
+			if(rm(IF) == 0)			// FSGNJ.S
+				sgn = sgn2;
+			else if(rm(IF) == 1)	// FSGNJN.S
+				sgn = sgn2 ^ (1 << 31);
+			else if(rm(IF) == 2)	// FSGNJX.S
+				sgn = sgn1 ^ sgn2;
+			else
+			{
+				// printf("FSGNJ.S error! No such instruction\n");
+				return 1;
+			}
 		
-		int res = sgn | val;
-		FRegFile[rd(IF)] = *(float*)&res;
-		return 0;
-	}
-	else if(funct5(IF) == 0x1C)	// FMV.X.S or FCLASS.S
-	{
-		if(rm(IF) == 0)			// FMV.X.S
-		{
-			RegFile[rd(IF)] = *(int*)&FRegFile[rs1(IF)];
+			int res = sgn | val;
+			FRegFile[rd(IF)] = *(float*)&res;
 			return 0;
 		}
-		else if(rm(IF) == 1)	// FCLASS.S
+		else if(funct5(IF) == 0x1C)	// FMV.X.S or FCLASS.S
 		{
-			int type;
-			int tmp = *(int*)&FRegFile[rs1(IF)];
-			int S = (tmp >> 31) & 0x1;
-			int E = (tmp >> 23) & 0xFF;
-			int F = tmp & 0x7FFFFF;
-			if(E == 0xFF && F != 0)	// nan
+			if(rm(IF) == 0)			// FMV.X.S
 			{
-				if(F >> 22)			// quiet nan
-					type = 9;
-				else				// signaling nan
-					type = 8;
+				RegFile[rd(IF)] = *(int*)&FRegFile[rs1(IF)];
+				return 0;
 			}
-			else if(S)				// negative
+			else if(rm(IF) == 1)	// FCLASS.S
 			{
-				if(E == 0xFF)		// -inf
-					type = 0;
-				else if(E > 0)		// -norm
-					type = 1;
-				else if(F > 0)		// -subnorm
-					type = 2;
-				else				// -0
-					type = 3;
-			}
-			else					// positive
-			{
-				if(E == 0xFF)		// +inf
-					type = 7;
-				else if(E > 0)		// +norm
-					type = 6;
-				else if(F > 0)		// +subnorm
-					type = 5;
-				else				// +0
-					type = 4;
-			}
+				int type;
+				int tmp = *(int*)&FRegFile[rs1(IF)];
+				int S = (tmp >> 31) & 0x1;
+				int E = (tmp >> 23) & 0xFF;
+				int F = tmp & 0x7FFFFF;
+				if(E == 0xFF && F != 0)	// nan
+				{
+					if(F >> 22)			// quiet nan
+						type = 9;
+					else				// signaling nan
+						type = 8;
+				}
+				else if(S)				// negative
+				{
+					if(E == 0xFF)		// -inf
+						type = 0;
+					else if(E > 0)		// -norm
+						type = 1;
+					else if(F > 0)		// -subnorm
+						type = 2;
+					else				// -0
+						type = 3;
+				}
+				else					// positive
+				{
+					if(E == 0xFF)		// +inf
+						type = 7;
+					else if(E > 0)		// +norm
+						type = 6;
+					else if(F > 0)		// +subnorm
+						type = 5;
+					else				// +0
+						type = 4;
+				}
 			
-			RegFile[rd(IF)] = (1 << type);
+				RegFile[rd(IF)] = (1 << type);
+				return 0;
+			}
+		}
+		else if(funct5(IF) == 0x1E)	// FMV.S.X
+		{
+			if(rm(IF) != 0)
+			{
+				// printf("FMV.S.X error! No such instruction\n");
+				return 1;
+			}
+			int tmp = RegFile[rs1(IF)];
+			FRegFile[rd(IF)] = *(float*)&tmp;
 			return 0;
 		}
-	}
-	else if(funct5(IF) == 0x1E)	// FMV.S.X
-	{
-		if(rm(IF) != 0)
+		else if(funct5(IF) == 0x14)	// FCMP.S (NaN not checked!)
 		{
-			// printf("FMV.S.X error! No such instruction\n");
+			if(rm(IF) == 2)			// FEQ.S
+			{
+				RegFile[rd(IF)] = (FRegFile[rs1(IF)] == FRegFile[rs2(IF)]);
+				return 0;
+			}
+			else if(rm(IF) == 1)	// FLT.S
+			{
+				RegFile[rd(IF)] = (FRegFile[rs1(IF)] < FRegFile[rs2(IF)]);
+				return 0;
+			}
+			else if(rm(IF) == 0)	// FLE.S
+			{
+				RegFile[rd(IF)] = (FRegFile[rs1(IF)] <= FRegFile[rs2(IF)]);
+				return 0;
+			}
+			else
+			{
+				// printf("FCMP.S error! No such instruction\n");
+				return 1;
+			}
+		}
+	}
+	else if(fmt(IF) == 1)	// (Mainly) D instructions
+	{
+		if(funct5(IF) == 0)			// FADD.D
+		{
+			DRegFile[rd(IF)] = DRegFile[rs1(IF)] + DRegFile[rs2(IF)];
+			return 0;
+		}
+		else if(funct5(IF) == 0x1)	// FSUB.D
+		{
+			DRegFile[rd(IF)] = DRegFile[rs1(IF)] - DRegFile[rs2(IF)];
+			return 0;
+		}
+		else if(funct5(IF) == 0x2)	// FMUL.D
+		{
+			DRegFile[rd(IF)] = DRegFile[rs1(IF)] * DRegFile[rs2(IF)];
+			return 0;
+		}
+		else if(funct5(IF) == 0x3)	// FDIV.D
+		{
+			DRegFile[rd(IF)] = DRegFile[rs1(IF)] / DRegFile[rs2(IF)];
+			return 0;
+		}
+		else if(funct5(IF) == 0xB)	// FSQRT.D
+		{
+			DRegFile[rd(IF)] = sqrt(DRegFile[rs1(IF)]);
+			return 0;
+		}
+		else if(funct5(IF) == 0x5)	// FMIN/MAX.D (NaN not checked!)
+		{
+			if(rm(IF) == 0)			// FMIN.D
+			{
+				DRegFile[rd(IF)] = (DRegFile[rs1(IF)] < DRegFile[rs2(IF)]) ? DRegFile[rs1(IF)] : DRegFile[rs2(IF)];
+				return 0;
+			}
+			else if(rm(IF) == 1)	// FMAX.D
+			{
+				DRegFile[rd(IF)] = (DRegFile[rs1(IF)] > DRegFile[rs2(IF)]) ? DRegFile[rs1(IF)] : DRegFile[rs2(IF)];
+				return 0;
+			}
+			else
+			{
+				// printf("FMIN/MAX.D error! No such instruction\n");
+				return 1;
+			}
+		}
+		else if(funct5(IF) == 0x18)	// FCVT.W[U].D
+		{
+			if(rs2(IF) == 0)		// FCVT.W.D
+			{
+				RegFile[rd(IF)] = (int)DRegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 1)	// FCVT.WU.D
+			{
+				RegFile[rd(IF)] = (unsigned int)DRegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 2)	// FCVT.L.D
+			{
+				RegFile[rd(IF)] = (long long)DRegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 3)	// FCVT.LU.D
+			{
+				RegFile[rd(IF)] = (unsigned long long)DRegFile[rs1(IF)];
+				return 0;
+			}
+			// printf("FCVT.x.D error! No such instruction\n");
 			return 1;
 		}
-		int tmp = RegFile[rs1(IF)];
-		FRegFile[rd(IF)] = *(float*)&tmp;
-		return 0;
-	}
-	else if(funct5(IF) == 0x14)	// FCMP (NaN not checked!)
-	{
-		if(rm(IF) == 2)			// FEQ.S
+		else if(funct5(IF) == 0x1A)	// FCVT.D.W[U]
 		{
-			RegFile[rd(IF)] = (FRegFile[rs1(IF)] == FRegFile[rs2(IF)]);
-			return 0;
-		}
-		else if(rm(IF) == 1)	// FLT.S
-		{
-			RegFile[rd(IF)] = (FRegFile[rs1(IF)] < FRegFile[rs2(IF)]);
-			return 0;
-		}
-		else if(rm(IF) == 0)	// FLE.S
-		{
-			RegFile[rd(IF)] = (FRegFile[rs1(IF)] <= FRegFile[rs2(IF)]);
-			return 0;
-		}
-		else
-		{
-			// printf("FCMP error! No such instruction\n");
+			if(rs2(IF) == 0)		// FCVT.D.W
+			{
+				DRegFile[rd(IF)] = (double)(int)RegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 1)	// FCVT.D.WU
+			{
+				DRegFile[rd(IF)] = (double)(unsigned int)RegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 2)	// FCVT.D.L
+			{
+				DRegFile[rd(IF)] = (double)RegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rs2(IF) == 3)	// FCVT.D.LU
+			{
+				DRegFile[rd(IF)] = (double)(unsigned long long)RegFile[rs1(IF)];
+				return 0;
+			}
+			// printf("FCVT.D.x error! No such instruction\n");
 			return 1;
 		}
+		else if(funct5(IF) == 0x8)	// FCVT.D.S
+		{
+			DRegFile[rd(IF)] = FRegFile[rs1(IF)];
+			return 0;
+		}
+		else if(funct5(IF) == 0x4)	// FSGNJ.D
+		{
+			long long src1 = *(long long*)&DRegFile[rs1(IF)];
+			long long src2 = *(long long*)&DRegFile[rs2(IF)];
+			long long sgn1 = ((src1 >> 63) << 63);
+			long long sgn2 = ((src2 >> 63) << 63);
+			long long sgn;
+			long long val = src1 & (~(1LL << 63));
+			if(rm(IF) == 0)			// FSGNJ.D
+				sgn = sgn2;
+			else if(rm(IF) == 1)	// FSGNJN.D
+				sgn = sgn2 ^ (1LL << 63);
+			else if(rm(IF) == 2)	// FSGNJX.D
+				sgn = sgn1 ^ sgn2;
+			else
+			{
+				// printf("FSGNJ.D error! No such instruction\n");
+				return 1;
+			}
+		
+			long long res = sgn | val;
+			DRegFile[rd(IF)] = *(double*)&res;
+			return 0;
+		}
+		else if(funct5(IF) == 0x1C)	// FMV.X.D or FCLASS.D
+		{
+			if(rm(IF) == 0)			// FMV.X.D
+			{
+				RegFile[rd(IF)] = *(long long*)&DRegFile[rs1(IF)];
+				return 0;
+			}
+			else if(rm(IF) == 1)	// FCLASS.D
+			{
+				int type;
+				long long tmp = *(long long*)&DRegFile[rs1(IF)];
+				long long S = (tmp >> 63) & 0x1;		// 1 bit
+				long long E = (tmp >> 52) & 0x7FF;		// 11 bits
+				long long F = tmp & ((1LL << 52)-1);	// 52 bits
+				if(E == 0x7FF && F != 0)// nan
+				{
+					if(F >> 51)			// quiet nan
+						type = 9;
+					else				// signaling nan
+						type = 8;
+				}
+				else if(S)				// negative
+				{
+					if(E == 0x7FF)		// -inf
+						type = 0;
+					else if(E > 0)		// -norm
+						type = 1;
+					else if(F > 0)		// -subnorm
+						type = 2;
+					else				// -0
+						type = 3;
+				}
+				else					// positive
+				{
+					if(E == 0x7FF)		// +inf
+						type = 7;
+					else if(E > 0)		// +norm
+						type = 6;
+					else if(F > 0)		// +subnorm
+						type = 5;
+					else				// +0
+						type = 4;
+				}
+			
+				RegFile[rd(IF)] = (1 << type);
+				return 0;
+			}
+		}
+		else if(funct5(IF) == 0x1E)	// FMV.D.X
+		{
+			if(rm(IF) != 0)
+			{
+				// printf("FMV.D.X error! No such instruction\n");
+				return 1;
+			}
+			long long tmp = RegFile[rs1(IF)];
+			DRegFile[rd(IF)] = *(double*)&tmp;
+			return 0;
+		}
+		else if(funct5(IF) == 0x14)	// FCMP.D (NaN not checked!)
+		{
+			if(rm(IF) == 2)			// FEQ.D
+			{
+				RegFile[rd(IF)] = (DRegFile[rs1(IF)] == DRegFile[rs2(IF)]);
+				return 0;
+			}
+			else if(rm(IF) == 1)	// FLT.D
+			{
+				RegFile[rd(IF)] = (DRegFile[rs1(IF)] < DRegFile[rs2(IF)]);
+				return 0;
+			}
+			else if(rm(IF) == 0)	// FLE.D
+			{
+				RegFile[rd(IF)] = (DRegFile[rs1(IF)] <= DRegFile[rs2(IF)]);
+				return 0;
+			}
+			else
+			{
+				// printf("FCMP.D error! No such instruction\n");
+				return 1;
+			}
+		}
 	}
+		
 	
 	// printf("OP_FP_func error! No such instruction\n");
 	return 1;
 }
 int FMADD_func(int IF)
 {
-	if(fmt(IF) != 0)
+	if(fmt(IF) == 0)		// FMADD.S
 	{
-		// printf("FMADD_func error! Not an F-instruction\n");
-		return 1;
+		FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)];
+		return 0;
 	}
-	FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)];
-	return 0;
+	else if(fmt(IF) == 1)	// FMADD.D
+	{
+		DRegFile[rd(IF)] = DRegFile[rs1(IF)] * DRegFile[rs2(IF)] + DRegFile[rs3(IF)];
+		return 0;
+	}
+	return 1;
 }
 int FMSUB_func(int IF)
 {
-	if(fmt(IF) != 0)
+	if(fmt(IF) == 0)		// FMSUB.S
 	{
-		// printf("FMSUB_func error! Not an F-instruction\n");
-		return 1;
+		FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)];
+		return 0;
 	}
-	FRegFile[rd(IF)] = FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)];
-	return 0;
+	else if(fmt(IF) == 1)	// FMSUB.D
+	{
+		DRegFile[rd(IF)] = DRegFile[rs1(IF)] * DRegFile[rs2(IF)] - DRegFile[rs3(IF)];
+		return 0;
+	}
+	return 1;
 }
 int FNMADD_func(int IF)
 {
-	if(fmt(IF) != 0)
+	if(fmt(IF) == 0)		// FNMADD.S
 	{
-		// printf("FNMADD_func error! Not an F-instruction\n");
-		return 1;
+		FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)] );
+		return 0;
 	}
-	FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] + FRegFile[rs3(IF)] );
-	return 0;
+	else if(fmt(IF) == 1)	// FNMADD.D
+	{
+		DRegFile[rd(IF)] = -( DRegFile[rs1(IF)] * DRegFile[rs2(IF)] + DRegFile[rs3(IF)] );
+		return 0;
+	}
+	return 1;
 }
 int FNMSUB_func(int IF)
 {
-	if(fmt(IF) != 0)
+	if(fmt(IF) == 0)		// FNMSUB.S
 	{
-		// printf("FNMSUB_func error! Not an F-instruction\n");
-		return 1;
+		FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)] );
+		return 0;
 	}
-	FRegFile[rd(IF)] = -( FRegFile[rs1(IF)] * FRegFile[rs2(IF)] - FRegFile[rs3(IF)] );
-	return 0;
+	else if(fmt(IF) == 1)	// FNMSUB.D
+	{
+		DRegFile[rd(IF)] = -( DRegFile[rs1(IF)] * DRegFile[rs2(IF)] - DRegFile[rs3(IF)] );
+		return 0;
+	}
+	return 1;
 }
 
 int SYSTEM_func(int IF)
@@ -1136,6 +1373,7 @@ void init(Addr entry)
 	RegFile[2] = Stack_base;				// set sp
 	// gp, tp ?
 	memset(FRegFile, 0, sizeof(FRegFile));
+	memset(DRegFile, 0, sizeof(DRegFile));
 	
 	PC = entry;
 }

@@ -5,6 +5,7 @@
 
 Reg RegFile[Reg_number];
 float FRegFile[Reg_number];
+double DRegFile[Reg_number];
 int fcsr = 0;								// Floating control and state register
 char Mem[Mem_size];
 Addr Stack_base = Mem_size - (1 << 12);		// save 4KB (may need to modify)
